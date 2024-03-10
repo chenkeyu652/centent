@@ -1,5 +1,7 @@
 package com.centent.core.define;
 
+import com.baomidou.mybatisplus.annotation.IEnum;
+
 import java.util.Objects;
 
 /**
@@ -7,7 +9,13 @@ import java.util.Objects;
  *
  * @since 0.0.1
  */
-public interface IBaseEnum {
+public interface IBaseEnum extends IEnum<Integer> {
+
+    /**
+     * @return 枚举显示名称
+     * @since 0.0.1
+     */
+    String getName();
 
     static <T extends IBaseEnum> T fromValue(Class<T> enumType, Integer value) {
         if (Objects.isNull(value)) {
@@ -21,16 +29,4 @@ public interface IBaseEnum {
         }
         return null;
     }
-
-    /**
-     * @return 枚举显示名称
-     * @since 0.0.1
-     */
-    String getName();
-
-    /**
-     * @return 枚举值
-     * @since 0.0.1
-     */
-    int getValue();
 }

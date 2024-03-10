@@ -23,6 +23,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -62,7 +63,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {NoResourceFoundException.class, NoHandlerFoundException.class})
     public Object noHandlerFoundException(HttpServletRequest request, Exception e) throws ExecutionException {
         this.commonHandle(request, e);
-        if (this.isInterface(request)) {
+        if (this.isInterface(request) || Objects.equals("/404", request.getRequestURI())) {
             return this.jsonResult(NotFoundException.CODE, NotFoundException.MESSAGE);
         }
         return "redirect:/404";
