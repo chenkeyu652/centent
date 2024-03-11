@@ -1,7 +1,11 @@
 package com.centent.core.define;
 
 import com.baomidou.mybatisplus.annotation.IEnum;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -28,5 +32,28 @@ public interface IBaseEnum extends IEnum<Integer> {
             }
         }
         return null;
+    }
+
+    /**
+     * jackson序列化IBaseEnum，额外添加翻译字段
+     *
+     * @since 0.1
+     */
+    class IBaseEnumSerializer extends JsonSerializer<IBaseEnum> {
+
+        private static final String TRANSLATE_LAST = "_trans";
+
+        @Override
+        public void serialize(IBaseEnum value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            if (value != null) {
+                String fieldName = gen.getOutputContext().getCurrentName();
+                gen.writeNumber(value.getValue());
+                gen.writeStringField(this.getTransName(fieldName), value.getName());
+            }
+        }
+
+        private String getTransName(String fieldName) {
+            return fieldName + TRANSLATE_LAST;
+        }
     }
 }

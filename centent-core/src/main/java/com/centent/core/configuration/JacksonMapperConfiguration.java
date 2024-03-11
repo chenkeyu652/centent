@@ -1,5 +1,7 @@
 package com.centent.core.configuration;
 
+import com.centent.core.define.IBaseEnum;
+import com.centent.core.define.IBaseEnum.IBaseEnumSerializer;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -30,6 +32,9 @@ public class JacksonMapperConfiguration {
             // 将Long类型转换成string类型返回，避免大整数导致前端精度丢失的问题
             builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
             builder.serializerByType(Long.class, ToStringSerializer.instance);
+
+            // IBaseEnum 序列化配置
+            builder.serializerByType(IBaseEnum.class, new IBaseEnumSerializer());
 
             // LocalDateTime 序列化配置
             builder.serializerByType(LocalDateTime.class, new LocalDateTimestampSerializer());
