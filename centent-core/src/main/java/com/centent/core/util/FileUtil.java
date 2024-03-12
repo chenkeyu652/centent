@@ -1,5 +1,6 @@
 package com.centent.core.util;
 
+import com.centent.core.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -7,8 +8,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 @Slf4j
 public class FileUtil {
@@ -60,6 +66,54 @@ public class FileUtil {
 
     public static String hash(MultipartFile file) {
         return hash(file, HASH_ALGORITHM);
+    }
+
+    /**
+     * 获取文件base64编码
+     *
+     * @param filePath 文件路径
+     * @param encode   是否编码
+     * @return base64编码信息，不带文件头
+     * @since 0.0.1
+     */
+    public static String getFileAsBase64(String filePath, boolean encode) {
+        try {
+            return getFileAsBase64(Files.readAllBytes(Paths.get(filePath)), encode);
+        } catch (IOException e) {
+            throw new BusinessException(e);
+        }
+    }
+
+    public static String getFileAsBase64(MultipartFile file, boolean encode) {
+        try {
+            return getFileAsBase64(file.getBytes(), encode);
+        } catch (IOException e) {
+            throw new BusinessException(e);
+        }
+    }
+
+    public static String getFileAsBase64(File file, boolean encode) {
+        try {
+            return getFileAsBase64(Files.readAllBytes(file.toPath()), encode);
+        } catch (IOException e) {
+            throw new BusinessException(e);
+        }
+    }
+
+    /**
+     * 获取文件base64编码
+     *
+     * @param fileBytes 文件字节数组
+     * @param encode    是否编码
+     * @return base64编码信息，不带文件头
+     * @since 0.0.1
+     */
+    public static String getFileAsBase64(byte[] fileBytes, boolean encode) {
+        String base64 = Base64.getEncoder().encodeToString(fileBytes);
+        if (encode) {
+            base64 = URLEncoder.encode(base64, StandardCharsets.UTF_8);
+        }
+        return base64;
     }
 
     private static String calculateHash(InputStream fis, String hashAlgorithm) throws NoSuchAlgorithmException, IOException {

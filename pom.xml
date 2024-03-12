@@ -12,6 +12,8 @@
         <module>centent-core</module>
         <module>centent-storage</module>
         <module>centent-storage-local</module>
+        <module>centent-ocr-baidu</module>
+        <module>centent-ocr</module>
     </modules>
 
     <properties>

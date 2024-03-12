@@ -10,7 +10,7 @@ public interface IRetrofitDefine {
 
     default Retrofit buildRetrofit() {
         return new Retrofit.Builder()
-                .baseUrl(this.getBaseUrl()) // 设置网络请求的Url地址
+                .baseUrl(this.getBaseUrl())
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();

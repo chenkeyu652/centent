@@ -4,6 +4,7 @@ import com.centent.core.configuration.JacksonMapperConfiguration.LocalDateTimest
 import com.centent.core.configuration.JacksonMapperConfiguration.LocalDateTimestampSerializer;
 import com.centent.core.define.IBaseEnum;
 import com.centent.core.define.IBaseEnum.IBaseEnumSerializer;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,8 @@ public class JSONUtil {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    private static final JavaType TYPE_MAP;
+
     static {
         SimpleModule module = new SimpleModule();
         // IBaseEnum 枚举字段添加翻译字段
@@ -26,8 +29,9 @@ public class JSONUtil {
         module.addSerializer(LocalDateTime.class, new LocalDateTimestampSerializer());
         module.addDeserializer(LocalDateTime.class, new LocalDateTimestampDeserializer());
         OBJECT_MAPPER.registerModule(module);
-    }
 
+        TYPE_MAP = OBJECT_MAPPER.getTypeFactory().constructMapType(Map.class, String.class, Object.class);
+    }
 
     public static String object2Json(Object object) {
         try {
@@ -41,6 +45,15 @@ public class JSONUtil {
     public static <T> T json2Object(String json, Class<T> clazz) {
         try {
             return OBJECT_MAPPER.readValue(json, clazz);
+        } catch (Exception e) {
+            log.error("", e);
+        }
+        return null;
+    }
+
+    public static Map<String, Object> json2Map(String json) {
+        try {
+            return OBJECT_MAPPER.readValue(json, TYPE_MAP);
         } catch (Exception e) {
             log.error("", e);
         }
