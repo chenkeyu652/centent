@@ -29,14 +29,14 @@ public abstract class BaseEntity<T extends Model<?>> extends Model<T> {
      * @since 0.0.1
      */
     @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
+    protected String id;
 
     /**
      * 备注
      *
      * @since 0.0.1
      */
-    private String remark;
+    protected String remark;
 
     /**
      * 创建时间
@@ -44,7 +44,7 @@ public abstract class BaseEntity<T extends Model<?>> extends Model<T> {
      * @since 0.0.1
      */
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    protected LocalDateTime createTime;
 
     /**
      * 更新时间
@@ -52,7 +52,7 @@ public abstract class BaseEntity<T extends Model<?>> extends Model<T> {
      * @since 0.0.1
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
+    protected LocalDateTime updateTime;
 
     /**
      * 自定义mybatis-plus填充插入时间和更新时间
