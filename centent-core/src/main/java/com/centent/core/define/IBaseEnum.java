@@ -15,12 +15,6 @@ import java.util.Objects;
  */
 public interface IBaseEnum extends IEnum<Integer> {
 
-    /**
-     * @return 枚举显示名称
-     * @since 0.0.1
-     */
-    String getName();
-
     static <T extends IBaseEnum> T fromValue(Class<T> enumType, Integer value) {
         if (Objects.isNull(value)) {
             return null;
@@ -33,6 +27,12 @@ public interface IBaseEnum extends IEnum<Integer> {
         }
         return null;
     }
+
+    /**
+     * @return 枚举显示名称
+     * @since 0.0.1
+     */
+    String getName();
 
     /**
      * jackson序列化IBaseEnum，额外添加翻译字段

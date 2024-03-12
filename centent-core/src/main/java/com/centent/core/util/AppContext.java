@@ -12,15 +12,15 @@ public class AppContext implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
-    // 实现ApplicationContextAware接口的context注入函数, 将其存入静态变量
-    public void setApplicationContext(@NotNull ApplicationContext applicationContext) {
-        AppContext.applicationContext = applicationContext;
-    }
-
     // 取得存储在静态变量中的ApplicationContext
     public static ApplicationContext getApplicationContext() {
         checkApplicationContext();
         return applicationContext;
+    }
+
+    // 实现ApplicationContextAware接口的context注入函数, 将其存入静态变量
+    public void setApplicationContext(@NotNull ApplicationContext applicationContext) {
+        AppContext.applicationContext = applicationContext;
     }
 
     // 从静态变量ApplicationContext中取得Bean, 自动转型为所赋值对象的类型
