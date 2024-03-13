@@ -7,28 +7,17 @@ import com.centent.ocr.IOCR;
 import com.centent.ocr.baidu.config.BaiduOCRConfig;
 import com.centent.ocr.baidu.retrofit.BaiduOCRAPI;
 import com.centent.ocr.bean.Idcard;
+import com.centent.ocr.bean.VehicleLicence;
 import com.centent.ocr.enums.Direction;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class BaiduOCR extends IOCR {
-
-    private static final Map<String, BiConsumer<Idcard, String>> PAIRS = Map.of(
-            "公民身份号码", Idcard::setNumber,
-            "姓名", Idcard::setName,
-            "性别", Idcard::setGender,
-            "住址", Idcard::setAddress,
-            "出生", Idcard::setBirthDay,
-            "民族", Idcard::setNation,
-            "签发机关", Idcard::setIssuingAuthority,
-            "签发日期", Idcard::setIssuingDate,
-            "失效日期", Idcard::setExpirationDate
-    );
 
     @Resource
     private BaiduOCRAPI baiduOCRAPI;
@@ -45,11 +34,11 @@ public class BaiduOCR extends IOCR {
                             idCardSide,
                             base64,
                             null,
-                            config.isDetectRisk(),
-                            config.isDetectQuality(),
-                            config.isDetectPhoto(),
-                            config.isDetectCard(),
-                            config.isDetectDirection())
+                            config.getIdcard().isDetectRisk(),
+                            config.getIdcard().isDetectQuality(),
+                            config.getIdcard().isDetectPhoto(),
+                            config.getIdcard().isDetectCard(),
+                            config.getIdcard().isDetectDirection())
                     .execute();
             Map<String, Object> body = response.body();
             if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
@@ -58,10 +47,10 @@ public class BaiduOCR extends IOCR {
 
             Idcard idcard = new Idcard();
             body.forEach((key, value) -> {
-                if (PAIRS.containsKey(key) && CententUtil.initialized(value)) {
+                if (BaiduOCRFieldPair.IDCARD_PAIRS.containsKey(key) && CententUtil.initialized(value)) {
                     CardEntity entity = JSONUtil.json2Object(value.toString(), CardEntity.class);
                     assert entity != null;
-                    PAIRS.get(key).accept(idcard, entity.getWords());
+                    BaiduOCRFieldPair.IDCARD_PAIRS.get(key).accept(idcard, entity.getWords());
                 }
             });
 
@@ -72,8 +61,38 @@ public class BaiduOCR extends IOCR {
     }
 
     @Override
-    public String vehicleLicence(String base64, Direction direction) {
-        return null;
+    public VehicleLicence vehicleLicence(String base64, Direction direction) {
+        String accessToken = this.getToken();
+        String idCardSide = direction == Direction.FRONT ? "front" : "back";
+
+        try {
+            Response<Map<String, Object>> response = baiduOCRAPI.vehicleLicence(accessToken,
+                            idCardSide,
+                            base64,
+                            null,
+                            config.getVehicleLicence().isDetectDirection(),
+                            config.getVehicleLicence().isUnified(),
+                            config.getVehicleLicence().isQualityWarn(),
+                            config.getVehicleLicence().isRiskWarn())
+                    .execute();
+            Map<String, Object> body = response.body();
+            if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
+                throw new HttpRequestException("调用百度行驶证OCR错误，response body is empty --> " + JSONUtil.toJSONString(body));
+            }
+
+            VehicleLicence vehicleLicence = new VehicleLicence();
+            body.forEach((key, value) -> {
+                if (BaiduOCRFieldPair.VEHICLE_LICENCE_PAIRS.containsKey(key) && CententUtil.initialized(value)) {
+                    CardEntity entity = JSONUtil.json2Object(value.toString(), CardEntity.class);
+                    assert entity != null;
+                    BaiduOCRFieldPair.VEHICLE_LICENCE_PAIRS.get(key).accept(vehicleLicence, entity.getWords());
+                }
+            });
+
+            return vehicleLicence;
+        } catch (IOException e) {
+            throw new HttpRequestException("调用百度OCR错误，行驶证识别失败", e);
+        }
     }
 
     private String getToken() {
