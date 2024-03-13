@@ -23,6 +23,8 @@ public abstract class IStorage {
 
     protected abstract File get0(Attachment attachment);
 
+    public abstract String getFilePath(String fileId);
+
     @Transactional
     public Attachment upload(MultipartFile file) {
         if (file.isEmpty()) {

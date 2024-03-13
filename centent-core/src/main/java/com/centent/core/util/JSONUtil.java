@@ -33,7 +33,7 @@ public class JSONUtil {
         TYPE_MAP = OBJECT_MAPPER.getTypeFactory().constructMapType(Map.class, String.class, Object.class);
     }
 
-    public static String object2Json(Object object) {
+    public static String toJSONString(Object object) {
         try {
             return OBJECT_MAPPER.writeValueAsString(object);
         } catch (Exception e) {

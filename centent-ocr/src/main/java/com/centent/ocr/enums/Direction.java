@@ -2,7 +2,7 @@ package com.centent.ocr.enums;
 
 import com.centent.core.define.IBaseEnum;
 
-public enum CardDirection implements IBaseEnum {
+public enum Direction implements IBaseEnum {
     FRONT(1, "正面"),
     BACK(2, "背面");
 
@@ -10,7 +10,7 @@ public enum CardDirection implements IBaseEnum {
 
     private final String name;
 
-    CardDirection(Integer value, String name) {
+    Direction(Integer value, String name) {
         this.value = value;
         this.name = name;
     }

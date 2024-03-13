@@ -4,6 +4,7 @@ import com.centent.core.exception.BusinessException;
 import com.centent.storage.IStorage;
 import com.centent.storage.entity.Attachment;
 import com.centent.storage.local.bean.StorageLocalConfig;
+import com.centent.storage.service.AttachmentService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,9 @@ public class StorageLocal extends IStorage {
 
     @Resource
     private StorageLocalConfig config;
+
+    @Resource
+    private AttachmentService attachmentService;
 
     @PostConstruct
     public void init() throws IOException {
@@ -44,5 +48,11 @@ public class StorageLocal extends IStorage {
             throw new BusinessException("文件不存在：" + attachment.getStoredFileName());
         }
         return target;
+    }
+
+    @Override
+    protected String getFilePath(String fileId) {
+        Attachment attachment = attachmentService.selectById(fileId);
+        return dest.getAbsolutePath() + File.separator + attachment.getStoredFileName();
     }
 }

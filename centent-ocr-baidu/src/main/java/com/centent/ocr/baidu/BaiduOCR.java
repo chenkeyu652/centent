@@ -1,23 +1,34 @@
 package com.centent.ocr.baidu;
 
-import com.centent.core.exception.BusinessException;
-import com.centent.core.util.FileUtil;
+import com.centent.core.exception.HttpRequestException;
+import com.centent.core.util.CententUtil;
 import com.centent.core.util.JSONUtil;
 import com.centent.ocr.IOCR;
 import com.centent.ocr.baidu.config.BaiduOCRConfig;
 import com.centent.ocr.baidu.retrofit.BaiduOCRAPI;
-import com.centent.ocr.enums.CardDirection;
+import com.centent.ocr.bean.Idcard;
+import com.centent.ocr.enums.Direction;
 import jakarta.annotation.Resource;
-import okhttp3.ResponseBody;
+import lombok.Data;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.MultipartFile;
 import retrofit2.Response;
 
-import java.io.File;
 import java.util.Map;
-import java.util.Objects;
+import java.util.function.BiConsumer;
 
-public class BaiduOCR implements IOCR {
+public class BaiduOCR extends IOCR {
+
+    private static final Map<String, BiConsumer<Idcard, String>> PAIRS = Map.of(
+            "公民身份号码", Idcard::setNumber,
+            "姓名", Idcard::setName,
+            "性别", Idcard::setGender,
+            "住址", Idcard::setAddress,
+            "出生", Idcard::setBirthDay,
+            "民族", Idcard::setNation,
+            "签发机关", Idcard::setIssuingAuthority,
+            "签发日期", Idcard::setIssuingDate,
+            "失效日期", Idcard::setExpirationDate
+    );
 
     @Resource
     private BaiduOCRAPI baiduOCRAPI;
@@ -26,20 +37,11 @@ public class BaiduOCR implements IOCR {
     private BaiduOCRConfig config;
 
     @Override
-    public String idcard(CardDirection direction, MultipartFile image) {
-        if (image.isEmpty()) {
-            throw new BusinessException("文件为空");
-        }
-        // 判断文件是否是图片
-        if (Objects.isNull(image.getContentType()) || !image.getContentType().startsWith("image")) {
-            throw new BusinessException("请上传图片");
-        }
-        // image转base64
-        String base64 = FileUtil.getFileAsBase64(image, true);
+    public Idcard idcard(String base64, Direction direction) {
         String accessToken = this.getToken();
-        String idCardSide = direction == CardDirection.FRONT ? "front" : "back";
+        String idCardSide = direction == Direction.FRONT ? "front" : "back";
         try {
-            Response<ResponseBody> response = baiduOCRAPI.idcard(accessToken,
+            Response<Map<String, Object>> response = baiduOCRAPI.idcard(accessToken,
                             idCardSide,
                             base64,
                             null,
@@ -49,59 +51,60 @@ public class BaiduOCR implements IOCR {
                             config.isDetectCard(),
                             config.isDetectDirection())
                     .execute();
+            Map<String, Object> body = response.body();
+            if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
+                throw new HttpRequestException("调用百度身份证OCR错误，response body is empty --> " + JSONUtil.toJSONString(body));
+            }
+
+            Idcard idcard = new Idcard();
+            body.forEach((key, value) -> {
+                if (PAIRS.containsKey(key) && CententUtil.initialized(value)) {
+                    CardEntity entity = JSONUtil.json2Object(value.toString(), CardEntity.class);
+                    assert entity != null;
+                    PAIRS.get(key).accept(idcard, entity.getWords());
+                }
+            });
+
+            return idcard;
         } catch (Exception e) {
-            throw new BusinessException("调用百度OCR错误，身份证识别失败", e);
+            throw new HttpRequestException("调用百度OCR错误，身份证识别失败", e);
         }
-        return null;
     }
 
     @Override
-    public String idcard(CardDirection direction, File image) {
-        return null;
-    }
-
-    @Override
-    public String idcard(CardDirection direction, String filePath) {
-        String accessToken = this.getToken();
-        String base64 = FileUtil.getFileAsBase64(filePath, true);
-        String idCardSide = direction == CardDirection.FRONT ? "front" : "back";
-        try {
-            Response<ResponseBody> response = baiduOCRAPI.idcard(accessToken,
-                            idCardSide,
-                            base64,
-                            null,
-                            config.isDetectRisk(),
-                            config.isDetectQuality(),
-                            config.isDetectPhoto(),
-                            config.isDetectCard(),
-                            config.isDetectDirection())
-                    .execute();
-        } catch (Exception e) {
-            throw new BusinessException("调用百度OCR错误，身份证识别失败", e);
-        }
+    public String vehicleLicence(String base64, Direction direction) {
         return null;
     }
 
     private String getToken() {
         try {
-            Response<ResponseBody> response = baiduOCRAPI.getToken(BaiduOCRAPI.GRANT_TYPE, config.getApiKey(), config.getSecretKey())
+            Response<Map<String, String>> response = baiduOCRAPI.getToken(BaiduOCRAPI.GRANT_TYPE, config.getApiKey(), config.getSecretKey())
                     .execute();
-            if (!response.isSuccessful()) {
-                throw new BusinessException("调用百度OCR错误，获取access_token失败，response code = " + response.code());
+            Map<String, String> body = response.body();
+            if (CollectionUtils.isEmpty(body) || !body.containsKey("access_token")) {
+                throw new HttpRequestException("调用百度OCR错误，获取access_token失败，response body: " + JSONUtil.toJSONString(body));
             }
-            try (ResponseBody body = response.body()) {
-                if (body != null) {
-                    String bodyString = body.string();
-                    Map<String, Object> result = JSONUtil.json2Map(bodyString);
-                    if (CollectionUtils.isEmpty(result) || !result.containsKey("access_token")) {
-                        throw new BusinessException("调用百度OCR错误，获取access_token失败，response body: " + bodyString);
-                    }
-                    return result.get("access_token").toString();
-                }
-                throw new BusinessException("调用百度OCR错误，获取access_token失败，response body is null");
-            }
+            return body.get("access_token");
         } catch (Exception e) {
-            throw new BusinessException("调用百度OCR错误，获取access_token失败", e);
+            throw new HttpRequestException("调用百度OCR错误，获取access_token失败", e);
         }
+    }
+
+    @Data
+    private static class CardEntity {
+
+        /**
+         * 识别结果
+         *
+         * @since 0.0.1
+         */
+        private String words;
+
+        /**
+         * 坐标信息
+         *
+         * @since 0.0.1
+         */
+        private Map<String, Integer> location;
     }
 }

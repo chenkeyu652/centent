@@ -1,6 +1,6 @@
 package com.centent.ocr.baidu;
 
-import com.centent.core.define.IRetrofitDefine;
+import com.centent.core.retrofit.IRetrofitDefine;
 import com.centent.ocr.IOCR;
 import com.centent.ocr.baidu.config.BaiduOCRConfig;
 import com.centent.ocr.baidu.retrofit.BaiduOCRAPI;
