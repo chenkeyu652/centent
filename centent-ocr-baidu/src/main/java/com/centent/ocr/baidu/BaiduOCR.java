@@ -119,11 +119,6 @@ public class BaiduOCR extends IOCR {
     }
 
     private String getToken() {
-        // TODO...测试代码
-        if (true) {
-            return "24.2c60257c3303204c358a29a6cb2b1904.2592000.1712989915.282335-56176550";
-        }
-
         try {
             return BAIDU_TOKEN_CACHE.get("access_token", () -> {
                 log.info("百度OCR access_token 无效或过期，重新获取");
