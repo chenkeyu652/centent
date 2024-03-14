@@ -24,7 +24,7 @@ public class BaiduOCRConfiguration implements IRetrofitDefine {
 
     @PostConstruct
     public void init() {
-        log.info("ocr-baidu init baseUrl:{}", config.getUrl());
+        log.info("ocr-baidu init baseUrl: {}", config.getUrl());
         this.retrofit = this.buildRetrofit();
     }
 
@@ -35,13 +35,13 @@ public class BaiduOCRConfiguration implements IRetrofitDefine {
 
     @Bean
     public IOCR baiduOCR() {
-        log.info("register bean: baiduOCR");
+        log.info("register conditional bean: baiduOCR");
         return new BaiduOCR();
     }
 
     @Bean
     public BaiduOCRAPI baiduOCRRAPI() {
-        log.info("register bean: baiduOCRRAPI");
+        log.info("register conditional bean: baiduOCRRAPI");
         return this.retrofit.create(BaiduOCRAPI.class);
     }
 }

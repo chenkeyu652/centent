@@ -13,7 +13,7 @@ public class StorageLocalConfiguration {
 
     @Bean
     public IStorage storageLocal() {
-        log.info("register bean: storageLocal");
+        log.info("register conditional bean: storageLocal");
         return new StorageLocal();
     }
 }

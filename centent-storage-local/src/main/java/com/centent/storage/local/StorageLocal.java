@@ -51,7 +51,7 @@ public class StorageLocal extends IStorage {
     }
 
     @Override
-    protected String getFilePath(String fileId) {
+    public String getFilePath(String fileId) {
         Attachment attachment = attachmentService.selectById(fileId);
         return dest.getAbsolutePath() + File.separator + attachment.getStoredFileName();
     }
