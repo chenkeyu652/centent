@@ -10,6 +10,14 @@ import java.io.File;
 
 public abstract class IOCR {
 
+    /**
+     * OCR系统名称
+     *
+     * @return OCR系统名称
+     * @since 0.0.1
+     */
+    public abstract String name();
+
     public abstract Idcard idcard(String base64, Direction direction);
 
     public abstract VehicleLicence vehicleLicence(String base64, Direction direction);

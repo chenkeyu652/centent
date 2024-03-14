@@ -20,17 +20,22 @@ import java.util.Map;
 public class BaiduOCR extends IOCR {
 
     @Resource
-    private BaiduOCRAPI baiduOCRAPI;
+    private BaiduOCRAPI api;
 
     @Resource
     private BaiduOCRConfig config;
+
+    @Override
+    public String name() {
+        return "百度OCR";
+    }
 
     @Override
     public Idcard idcard(String base64, Direction direction) {
         String accessToken = this.getToken();
         String idCardSide = direction == Direction.FRONT ? "front" : "back";
         try {
-            Response<Map<String, Object>> response = baiduOCRAPI.idcard(accessToken,
+            Response<Map<String, Object>> response = api.idcard(accessToken,
                             idCardSide,
                             base64,
                             null,
@@ -66,7 +71,7 @@ public class BaiduOCR extends IOCR {
         String idCardSide = direction == Direction.FRONT ? "front" : "back";
 
         try {
-            Response<Map<String, Object>> response = baiduOCRAPI.vehicleLicence(accessToken,
+            Response<Map<String, Object>> response = api.vehicleLicence(accessToken,
                             idCardSide,
                             base64,
                             null,
@@ -97,7 +102,7 @@ public class BaiduOCR extends IOCR {
 
     private String getToken() {
         try {
-            Response<Map<String, String>> response = baiduOCRAPI.getToken(BaiduOCRAPI.GRANT_TYPE, config.getApiKey(), config.getSecretKey())
+            Response<Map<String, String>> response = api.getToken(BaiduOCRAPI.GRANT_TYPE, config.getApiKey(), config.getSecretKey())
                     .execute();
             Map<String, String> body = response.body();
             if (CollectionUtils.isEmpty(body) || !body.containsKey("access_token")) {
