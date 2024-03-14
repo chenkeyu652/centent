@@ -13,11 +13,10 @@ import java.io.IOException;
 
 class BaiduOCRTest {
 
+    static final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().build();
     private static final String API_KEY = "QjCxqWRpCTczl04valxbut38";
     private static final String SECRET_KEY = "vq88FQSglCMnryie7pdBDEkoovIrlDnk";
     private static final String ACCESS_TOKEN = "24.2c60257c3303204c358a29a6cb2b1904.2592000.1712989915.282335-56176550";
-
-    static final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().build();
 
     @Test
     void idcard() throws IOException {

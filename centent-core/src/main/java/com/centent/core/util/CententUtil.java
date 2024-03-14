@@ -4,6 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.ObjectUtils;
 
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 /**
  * 通用工具类
  *
@@ -42,5 +45,11 @@ public class CententUtil {
             }
         }
         return null;
+    }
+
+    public static <T> void executeIf(Predicate<T> predicate, T value, Consumer<T> consumer) {
+        if (predicate.test(value)) {
+            consumer.accept(value);
+        }
     }
 }
