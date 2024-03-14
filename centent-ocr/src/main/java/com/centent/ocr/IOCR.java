@@ -23,32 +23,32 @@ public abstract class IOCR {
     public abstract VehicleLicence vehicleLicence(String base64, Direction direction);
 
     public final Idcard idcard(Direction direction, MultipartFile image) {
-        String base64 = FileUtil.getFileAsBase64(image, true);
+        String base64 = FileUtil.getFileAsBase64(image, false);
         return this.idcard(base64, direction);
     }
 
     public final Idcard idcard(Direction direction, File image) {
-        String base64 = FileUtil.getFileAsBase64(image, true);
+        String base64 = FileUtil.getFileAsBase64(image, false);
         return this.idcard(base64, direction);
     }
 
     public final Idcard idcard(Direction direction, String filePath) {
-        String base64 = FileUtil.getFileAsBase64(filePath, true);
+        String base64 = FileUtil.getFileAsBase64(filePath, false);
         return this.idcard(base64, direction);
     }
 
     public final VehicleLicence vehicleLicence(Direction direction, MultipartFile image) {
-        String base64 = FileUtil.getFileAsBase64(image, true);
+        String base64 = FileUtil.getFileAsBase64(image, false);
         return this.vehicleLicence(base64, direction);
     }
 
     public final VehicleLicence vehicleLicence(Direction direction, File image) {
-        String base64 = FileUtil.getFileAsBase64(image, true);
+        String base64 = FileUtil.getFileAsBase64(image, false);
         return this.vehicleLicence(base64, direction);
     }
 
     public final VehicleLicence vehicleLicence(Direction direction, String filePath) {
-        String base64 = FileUtil.getFileAsBase64(filePath, true);
+        String base64 = FileUtil.getFileAsBase64(filePath, false);
         return this.vehicleLicence(base64, direction);
     }
 }

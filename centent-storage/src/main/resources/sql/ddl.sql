@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS attachment
 (
-    id          VARCHAR(32) PRIMARY KEY,
+    id          VARCHAR(64) PRIMARY KEY,
     name        VARCHAR(255),
     type        VARCHAR(255),
     size        BIGINT,

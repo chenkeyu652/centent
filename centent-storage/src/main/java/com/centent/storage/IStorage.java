@@ -87,7 +87,7 @@ public abstract class IStorage {
         attachment.setName(name);
 
         if (name.contains(".")) {
-            attachment.setType(name.substring(name.lastIndexOf(".")));
+            attachment.setType(name.substring(name.lastIndexOf(".") + 1));
         }
         if (exists) {
             attachmentMapper.updateById(attachment);

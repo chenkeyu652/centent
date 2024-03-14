@@ -29,6 +29,7 @@ public class CommonInterceptor implements Interceptor {
         if (Objects.nonNull(requestBody)) {
             Buffer requestBuffer = new Buffer();
             requestBody.writeTo(requestBuffer);
+            log.debug("Request Content-Type: {}", requestBody.contentType());
             log.debug("Request body: {}", requestBuffer.readString(StandardCharsets.UTF_8));
         }
 
