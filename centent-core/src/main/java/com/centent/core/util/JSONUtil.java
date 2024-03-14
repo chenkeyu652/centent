@@ -30,6 +30,9 @@ public class JSONUtil {
         module.addDeserializer(LocalDateTime.class, new LocalDateTimestampDeserializer());
         OBJECT_MAPPER.registerModule(module);
 
+        // 反序列化时忽略对象中不存在的json字段
+        // OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         TYPE_MAP = OBJECT_MAPPER.getTypeFactory().constructMapType(Map.class, String.class, Object.class);
     }
 

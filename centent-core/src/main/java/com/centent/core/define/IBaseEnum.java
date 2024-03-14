@@ -1,6 +1,8 @@
 package com.centent.core.define;
 
 import com.baomidou.mybatisplus.annotation.IEnum;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -33,6 +35,14 @@ public interface IBaseEnum extends IEnum<Integer> {
      * @since 0.0.1
      */
     String getName();
+
+    /**
+     * @return 枚举值
+     * @since 0.0.1
+     */
+    @JsonValue
+    @JsonCreator
+    Integer getValue();
 
     /**
      * jackson序列化IBaseEnum，额外添加翻译字段

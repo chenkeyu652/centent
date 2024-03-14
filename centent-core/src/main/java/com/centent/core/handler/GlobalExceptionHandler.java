@@ -3,6 +3,7 @@ package com.centent.core.handler;
 import com.centent.core.bean.Result;
 import com.centent.core.exception.AuthorizedException;
 import com.centent.core.exception.BusinessException;
+import com.centent.core.exception.HttpRequestException;
 import com.centent.core.exception.IllegalArgumentException;
 import com.centent.core.exception.NotFoundException;
 import com.centent.core.exception.UnimportantException;
@@ -45,6 +46,13 @@ public class GlobalExceptionHandler {
     @RequestMapping("/error")
     public Result<Void> error() {
         return Result.error();
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = HttpRequestException.class)
+    public Result<Object> businessException(HttpServletRequest request, HttpRequestException e) {
+        log.error(e.getMessage(), e);
+        return Result.error(e.getCode(), e.getMessage());
     }
 
     @ResponseBody
