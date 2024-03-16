@@ -3,26 +3,40 @@ package com.centent.data.division;
 import com.centent.core.exception.BusinessException;
 import com.centent.data.DataService;
 import com.centent.data.division.mapper.IdentityAddressMapper;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class IdentityAddressService implements DataService {
 
-    private static final List<IdentityAddress> ALL = Lists.newArrayList();
+    private static final Map<Integer, List<IdentityAddress>> IDENTITY_ADDRESS = Maps.newHashMap();
 
     @Resource
     private IdentityAddressMapper mapper;
+
+    @Override
+    public String name() {
+        return "中华人民共和国行政区划";
+    }
+
+    @Override
+    public void loadCache() {
+        IDENTITY_ADDRESS.clear();
+        // 获取全量的行政区划数据
+        List<IdentityAddress> addresses = mapper.selectList(null);
+        // 行政区划数据按code分组，缓存起来
+        IDENTITY_ADDRESS.putAll(addresses.stream().collect(Collectors.groupingBy(IdentityAddress::getCode)));
+    }
 
     /**
      * 身份证号码+完整的身份证地址，较为精准的匹配行政区划
@@ -36,7 +50,7 @@ public class IdentityAddressService implements DataService {
         if (Strings.isBlank(identityAddress)) {
             identityAddress = "（未传入身份证地址）";
         }
-        if (Strings.isBlank(identity) || identity.length() < 11) {
+        if (Strings.isBlank(identity) || identity.length() < 6) {
             return null;
         }
         // 截取身份证前6位
@@ -44,18 +58,17 @@ public class IdentityAddressService implements DataService {
         int cityCode = areaCode - areaCode % 100;
         int provinceCode = areaCode - areaCode % 10000;
 
-        Map<Integer, List<IdentityAddress>> matches = this.find(areaCode, cityCode, provinceCode);
-        IdentityAddress area = this.matchBest(matches.get(areaCode), identityAddress);
-        IdentityAddress city = this.matchBest(matches.get(cityCode), identityAddress);
-        IdentityAddress province = this.matchBest(matches.get(provinceCode), identityAddress);
+        IdentityAddress area = this.matchBest(IDENTITY_ADDRESS.get(areaCode), identityAddress);
+        IdentityAddress city = this.matchBest(IDENTITY_ADDRESS.get(cityCode), identityAddress);
+        IdentityAddress province = this.matchBest(IDENTITY_ADDRESS.get(provinceCode), identityAddress);
         if (Objects.isNull(area)) {
             throw new BusinessException("无法获取身份证地址区域信息，identity：" + identity + "，identityAddress：" + identityAddress);
         }
-        if (Objects.isNull(city)) {
-            throw new BusinessException("无法获取身份证地址市区信息，identity：" + identity + "，identityAddress：" + identityAddress);
-        }
         if (Objects.isNull(province)) {
             throw new BusinessException("无法获取身份证地址省份信息，identity：" + identity + "，identityAddress：" + identityAddress);
+        }
+        if (Objects.isNull(city)) {
+            city = province; // 直辖市特殊处理
         }
         area.setCity(city);
         area.setProvince(province);
@@ -73,28 +86,6 @@ public class IdentityAddressService implements DataService {
         return this.matchArea(identity, null);
     }
 
-    private Map<Integer, List<IdentityAddress>> find(int areaCode, int cityCode, int provinceCode) {
-        Map<Integer, List<IdentityAddress>> result = Map.of(
-                areaCode, new ArrayList<>(),
-                cityCode, new ArrayList<>(),
-                provinceCode, new ArrayList<>()
-        );
-        for (IdentityAddress address : ALL) {
-            if (Objects.equals(address.getCode(), areaCode)) {
-                result.get(areaCode).add(address);
-            } else if (Objects.equals(address.getCode(), cityCode)) {
-                result.get(cityCode).add(address);
-            } else if (Objects.equals(address.getCode(), provinceCode)) {
-                result.get(provinceCode).add(address);
-            }
-        }
-        // 直辖市使用省份区划作为市区划
-        if (CollectionUtils.isEmpty(result.get(cityCode))) {
-            result.get(cityCode).addAll(result.get(provinceCode));
-        }
-        return result;
-    }
-
     private IdentityAddress matchBest(List<IdentityAddress> matches, String identityAddress) {
         if (CollectionUtils.isEmpty(matches)) {
             return null;
@@ -103,23 +94,12 @@ public class IdentityAddressService implements DataService {
         if (matches.size() == 1) {
             return matches.get(0);
         }
-        // 如果年份匹配仍然失败，根据身份证完整地址匹配
+        // 根据身份证完整地址检查匹配
         for (IdentityAddress match : matches) {
             if (identityAddress.contains(match.getName())) {
                 return match;
             }
         }
         return null;
-    }
-
-    @Override
-    public String name() {
-        return "中华人民共和国行政区划";
-    }
-
-    @Override
-    public void loadCache() {
-        ALL.clear();
-        ALL.addAll(mapper.selectList(null));
     }
 }
