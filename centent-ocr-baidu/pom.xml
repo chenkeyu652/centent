@@ -15,27 +15,21 @@
         <dependency>
             <groupId>com.centent</groupId>
             <artifactId>centent-ocr</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>retrofit</artifactId>
-            <version>2.9.0</version>
             <optional>true</optional>
         </dependency>
-        <!-- Jackson Converter -->
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>converter-jackson</artifactId>
-            <version>2.9.0</version>
             <optional>true</optional>
         </dependency>
-        <!-- Scalars Converter -->
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>converter-scalars</artifactId>
-            <version>2.9.0</version>
             <optional>true</optional>
         </dependency>
     </dependencies>

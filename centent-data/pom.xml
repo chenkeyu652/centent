@@ -9,12 +9,17 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>centent-storage-local</artifactId>
+    <artifactId>centent-data</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.centent</groupId>
-            <artifactId>centent-storage</artifactId>
+            <artifactId>centent-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
         </dependency>
     </dependencies>
 
