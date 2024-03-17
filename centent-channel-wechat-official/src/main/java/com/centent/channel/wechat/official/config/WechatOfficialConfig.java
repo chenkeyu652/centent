@@ -17,6 +17,13 @@ public class WechatOfficialConfig {
     private String url;
 
     /**
+     * 授权给微信的服务域名
+     *
+     * @since 0.0.1
+     */
+    private String authDomain;
+
+    /**
      * 微信公众号id
      *
      * @since 0.0.1

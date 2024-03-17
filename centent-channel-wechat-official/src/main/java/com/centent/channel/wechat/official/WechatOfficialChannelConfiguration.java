@@ -2,6 +2,7 @@ package com.centent.channel.wechat.official;
 
 import com.centent.channel.wechat.official.config.WechatOfficialConfig;
 import com.centent.channel.wechat.official.retrofit.WechatOfficialAPI;
+import com.centent.channel.wechat.official.service.WechatOfficialService;
 import com.centent.core.retrofit.IRetrofitDefine;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -14,15 +15,19 @@ import retrofit2.Retrofit;
 @Configuration
 public class WechatOfficialChannelConfiguration implements IRetrofitDefine {
 
+    private Retrofit retrofit;
+
     @Resource
     private WechatOfficialConfig config;
 
-    private Retrofit retrofit;
+    @Resource
+    private WechatOfficialService wechatOfficialService;
 
     @PostConstruct
     public void init() {
         log.info("channel-wechat-official baseUrl: {}", config.getUrl());
         this.retrofit = this.buildRetrofit();
+        wechatOfficialService.refreshMenus();
     }
 
     @Override

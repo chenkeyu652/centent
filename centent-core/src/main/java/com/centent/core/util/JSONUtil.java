@@ -37,6 +37,9 @@ public class JSONUtil {
     }
 
     public static String toJSONString(Object object) {
+        if (Objects.isNull(object)) {
+            return null;
+        }
         try {
             return OBJECT_MAPPER.writeValueAsString(object);
         } catch (Exception e) {
