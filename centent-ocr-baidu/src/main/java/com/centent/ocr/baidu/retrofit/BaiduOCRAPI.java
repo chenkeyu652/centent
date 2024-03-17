@@ -3,6 +3,7 @@ package com.centent.ocr.baidu.retrofit;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -12,7 +13,7 @@ public interface BaiduOCRAPI {
 
     String GRANT_TYPE = "client_credentials";
 
-    @POST("/oauth/2.0/token")
+    @GET("/oauth/2.0/token")
     Call<Map<String, String>> getToken(@Query("grant_type") String grantType, // 固定值：client_credentials
                                        @Query("client_id") String apiKey, // 应用API key
                                        @Query("client_secret") String secretKey); // 应用Secret key

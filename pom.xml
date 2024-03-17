@@ -15,6 +15,8 @@
         <module>centent-ocr-baidu</module>
         <module>centent-ocr</module>
         <module>centent-data</module>
+        <module>centent-channel</module>
+        <module>centent-channel-wechat-official</module>
     </modules>
 
     <properties>
@@ -93,36 +95,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>com.centent</groupId>
-                <artifactId>centent-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.centent</groupId>
-                <artifactId>centent-data</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.centent</groupId>
-                <artifactId>centent-ocr</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.centent</groupId>
-                <artifactId>centent-ocr-baidu</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.centent</groupId>
-                <artifactId>centent-storage</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.centent</groupId>
-                <artifactId>centent-storage-local</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>com.squareup.retrofit2</groupId>
@@ -174,6 +146,48 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+
+            <!--CENTENT依赖定义-->
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-data</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-ocr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-ocr-baidu</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-storage</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-storage-local</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-channel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-channel-wechat-official</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -9,12 +9,12 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>centent-ocr-baidu</artifactId>
+    <artifactId>centent-channel-wechat-official</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.centent</groupId>
-            <artifactId>centent-ocr</artifactId>
+            <artifactId>centent-channel</artifactId>
         </dependency>
 
         <dependency>
