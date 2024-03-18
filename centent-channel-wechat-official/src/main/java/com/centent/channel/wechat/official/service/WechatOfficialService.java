@@ -42,7 +42,7 @@ public class WechatOfficialService {
         OfficialMenu menu;
         try (InputStream inputStream = resource.openStream()) {
             String menuJson = new String(inputStream.readAllBytes());
-            log.debug("微信公众号菜单配置：{}", menuJson);
+            log.debug("微信公众号菜单配置：\n{}", menuJson);
             menu = JSONUtil.json2Object(menuJson, OfficialMenu.class);
         } catch (Exception e) {
             throw new BusinessException("读取微信公众号菜单配置文件失败：" + MENU_FILE_PATH, e);
