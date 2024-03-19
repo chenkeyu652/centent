@@ -3,8 +3,13 @@ package com.centent.data.division;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.centent.core.define.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 中华人民共和国行政区划表 - 身份证地址码表
@@ -14,6 +19,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @TableName("identity_address")
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true, exclude = {"current"})
 public class IdentityAddress extends BaseEntity<IdentityAddress> {
 
     /**
@@ -49,6 +55,7 @@ public class IdentityAddress extends BaseEntity<IdentityAddress> {
      *
      * @since 0.0.1
      */
+    @JsonIgnore
     private transient IdentityAddress city;
 
     /**
@@ -56,5 +63,22 @@ public class IdentityAddress extends BaseEntity<IdentityAddress> {
      *
      * @since 0.0.1
      */
+    @JsonIgnore
     private transient IdentityAddress province;
+
+    /**
+     * 新的行政区划
+     *
+     * @since 0.0.1
+     */
+    @JsonIgnore
+    private transient Set<IdentityAddress> next;
+
+    /**
+     * 当前行政区划
+     *
+     * @since 0.0.1
+     */
+    @JsonIgnore
+    private transient Set<IdentityAddress> current = new HashSet<>();
 }
