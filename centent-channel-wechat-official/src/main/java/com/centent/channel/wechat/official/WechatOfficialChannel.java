@@ -12,6 +12,7 @@ import com.centent.core.util.JSONUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 public class WechatOfficialChannel implements IChannel {
 
@@ -44,7 +46,7 @@ public class WechatOfficialChannel implements IChannel {
     @Override
     public void sendNotify(NotifyContext context) {
         // TODO...发送微信通知
-        IChannel.super.sendNotify(context);
+        log.debug("我是微信公众号，代码还没写完，只能假装通知发成功了~");
     }
 
     public void createMenu(OfficialMenu menu) {
