@@ -9,7 +9,7 @@ import org.apache.logging.log4j.util.Strings;
 @Data
 @TableName("attachment")
 @EqualsAndHashCode(callSuper = true)
-public class Attachment extends BaseEntity<Attachment> {
+public class Attachment extends BaseEntity {
 
     /**
      * 文件名称

@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import com.baomidou.mybatisplus.extension.activerecord.Model;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
@@ -20,8 +18,7 @@ import java.time.LocalDateTime;
  * @since 0.0.1
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public abstract class BaseEntity<T extends Model<?>> extends Model<T> {
+public abstract class BaseEntity {
 
     /**
      * 数据ID

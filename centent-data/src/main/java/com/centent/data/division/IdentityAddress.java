@@ -20,7 +20,7 @@ import java.util.Set;
 @TableName("identity_address")
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true, exclude = {"current"})
-public class IdentityAddress extends BaseEntity<IdentityAddress> {
+public class IdentityAddress extends BaseEntity {
 
     /**
      * 行政区划代码

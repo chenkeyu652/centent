@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @TableName("identity_address_change")
 @EqualsAndHashCode(callSuper = true)
-public class IdentityAddressChange extends BaseEntity<IdentityAddressChange> {
+public class IdentityAddressChange extends BaseEntity {
 
     /**
      * 原行政区划代码

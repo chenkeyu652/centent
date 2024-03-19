@@ -1,7 +1,6 @@
 package com.centent.core.define;
 
 import com.baomidou.mybatisplus.annotation.IEnum;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -41,7 +40,6 @@ public interface IBaseEnum extends IEnum<Integer> {
      * @since 0.0.1
      */
     @JsonValue
-    @JsonCreator
     Integer getValue();
 
     /**

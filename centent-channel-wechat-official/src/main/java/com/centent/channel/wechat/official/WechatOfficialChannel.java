@@ -1,6 +1,7 @@
 package com.centent.channel.wechat.official;
 
 import com.centent.channel.IChannel;
+import com.centent.channel.NotifyContext;
 import com.centent.channel.wechat.official.bean.OfficialMenu;
 import com.centent.channel.wechat.official.bean.SNSToken;
 import com.centent.channel.wechat.official.config.WechatOfficialConfig;
@@ -38,6 +39,12 @@ public class WechatOfficialChannel implements IChannel {
     @Override
     public Channel channel() {
         return Channel.WECHAT_OFFICE;
+    }
+
+    @Override
+    public void sendNotify(NotifyContext context) {
+        // TODO...发送微信通知
+        IChannel.super.sendNotify(context);
     }
 
     public void createMenu(OfficialMenu menu) {

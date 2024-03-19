@@ -10,7 +10,7 @@ public enum Channel implements IBaseEnum {
 
     private final String name;
 
-    private Channel(Integer value, String name) {
+    Channel(Integer value, String name) {
         this.value = value;
         this.name = name;
     }
