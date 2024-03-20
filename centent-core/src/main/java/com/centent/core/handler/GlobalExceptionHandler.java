@@ -70,11 +70,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {NoResourceFoundException.class, NoHandlerFoundException.class})
     public Object noHandlerFoundException(HttpServletRequest request, Exception e) throws ExecutionException {
-        this.commonHandle(request, e);
+        if (!e.getMessage().endsWith(".map.")) { // css.map, or js.map
+            this.commonHandle(request, e);
+        }
         if (this.isInterface(request) || Objects.equals("/404", request.getRequestURI())) {
             return this.jsonResult(NotFoundException.CODE, NotFoundException.MESSAGE);
         }
-        return "redirect:/404";
+        return "redirect:/404.html";
     }
 
     @ExceptionHandler(value = AuthorizedException.class)
