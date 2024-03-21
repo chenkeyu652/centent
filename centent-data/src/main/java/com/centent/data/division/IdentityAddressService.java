@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
+@Component
 public class IdentityAddressService implements DataService {
 
     private static final Map<Integer, List<IdentityAddress>> IDENTITY_ADDRESS = Maps.newHashMap();
@@ -33,11 +33,11 @@ public class IdentityAddressService implements DataService {
 
     @Override
     public String name() {
-        return "中华人民共和国行政区划";
+        return "中华人民共和国行政区划全数据";
     }
 
     @Override
-    public void loadCache() {
+    public void load() {
         IDENTITY_ADDRESS.clear();
         // 获取全量的行政区划数据
         List<IdentityAddress> addresses = mapper.selectList(null);
