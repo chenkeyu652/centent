@@ -35,6 +35,7 @@ public class WechatOfficialChannel implements IChannel {
 
     @Resource
     private WechatOfficialConfig config;
+
     @Resource
     private WechatOfficialAPI api;
 

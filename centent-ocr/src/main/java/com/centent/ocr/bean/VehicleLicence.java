@@ -3,7 +3,14 @@ package com.centent.ocr.bean;
 import lombok.Data;
 
 @Data
-public class VehicleLicence {
+public class VehicleLicence implements OCRResult {
+
+    /**
+     * 文件ID
+     *
+     * @since 0.0.1
+     */
+    private String id;
 
     /**
      * 车辆识别代号
@@ -39,6 +46,13 @@ public class VehicleLicence {
      * @since 0.0.1
      */
     private String model;
+
+    /**
+     * 品牌型号（已去除中文）
+     *
+     * @since 0.0.1
+     */
+    private String modelType;
 
     /**
      * 车辆类型

@@ -6,12 +6,12 @@ import lombok.Data;
 import java.util.Objects;
 
 @Data
-public class Idcard {
+public class Idcard implements OCRResult {
 
     public static final String LONG_TERM = "长期";
 
     /**
-     * ID
+     * 文件ID
      *
      * @since 0.0.1
      */
@@ -58,6 +58,34 @@ public class Idcard {
      * @since 0.0.1
      */
     private String nation;
+
+    /**
+     * 当前行政区划-省
+     *
+     * @since 0.0.1
+     */
+    private String idAddressProvince;
+
+    /**
+     * 当前行政区划-市
+     *
+     * @since 0.0.1
+     */
+    private String idAddressCity;
+
+    /**
+     * 当前行政区划-区
+     *
+     * @since 0.0.1
+     */
+    private String idAddressArea;
+
+    /**
+     * 详细地址（不包含省市区）
+     *
+     * @since 0.0.1
+     */
+    private String idAddressLast;
 
     // ========================================= 以上是身份证（人像面）信息 =========================================
     // ========================================= 以下是身份证（国徽面）信息 =========================================

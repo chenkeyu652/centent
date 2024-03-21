@@ -45,7 +45,7 @@ public class BaiduOCR extends IOCR {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Idcard idcard(String base64, Direction direction) {
+    public Idcard idcard0(String base64, Direction direction) {
         String accessToken = this.getToken();
         String cardSide = direction == Direction.FRONT ? "front" : "back";
         try {
@@ -82,7 +82,7 @@ public class BaiduOCR extends IOCR {
 
     @Override
     @SuppressWarnings("unchecked")
-    public VehicleLicence vehicleLicence(String base64, Direction direction) {
+    public VehicleLicence vehicleLicence0(String base64, Direction direction) {
         String accessToken = this.getToken();
         String cardSide = direction == Direction.FRONT ? "front" : "back";
 
