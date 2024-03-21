@@ -15,7 +15,6 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Optional;
 
 @Slf4j
 public abstract class IOCR {
@@ -89,22 +88,11 @@ public abstract class IOCR {
             String idAddress = idcard.getAddress();
             IdentityAddress area = identityAddressService.matchArea(idcard.getNumber(), idAddress);
 
-            // 根据行政区划获取现行行政区划
-            Optional.of(area)
-                    .map(IdentityAddress::getCurrent)
-                    .filter(c -> c.size() == 1)
-                    .orElseThrow(() -> new BusinessException("身份证地址解析失败，匹配到多个现行行政区划：" + JSONUtil.toJSONString(area.getCurrent())));
-            IdentityAddress current = area.getCurrent().iterator().next();
-
-            idcard.setIdAddressArea(current.getName());
-            idcard.setIdAddressCity(current.getCity().getName());
-            idcard.setIdAddressProvince(current.getProvince().getName());
-            if (idAddress.contains(current.getName())) {
-                int index = idAddress.indexOf(current.getName()) + current.getName().length();
-                idcard.setIdAddressLast(idAddress.substring(index));
-            } else if (idAddress.contains(current.getCity().getName())) {
-                int index = idAddress.indexOf(current.getCity().getName()) + current.getCity().getName().length();
-                idcard.setIdAddressLast(idAddress.substring(index));
+            idcard.getRegions().addAll(area.getCurrent());
+            String areaName = area.getName();
+            if (idAddress.contains(areaName)) {
+                int index = idAddress.indexOf(areaName) + areaName.length();
+                idcard.setAddressLast(idAddress.substring(index));
             } else {
                 log.error("idAddressLast匹配失败，身份证完整地址为: {}, 解析出的行政区划信息为: {}", idAddress, JSONUtil.toJSONString(area));
             }

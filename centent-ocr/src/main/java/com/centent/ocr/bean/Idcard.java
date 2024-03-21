@@ -1,8 +1,11 @@
 package com.centent.ocr.bean;
 
+import com.centent.data.division.bean.Region;
 import com.google.common.base.Strings;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -60,32 +63,18 @@ public class Idcard implements OCRResult {
     private String nation;
 
     /**
-     * 当前行政区划-省
+     * 当前行政区划代码
      *
      * @since 0.0.1
      */
-    private String idAddressProvince;
-
-    /**
-     * 当前行政区划-市
-     *
-     * @since 0.0.1
-     */
-    private String idAddressCity;
-
-    /**
-     * 当前行政区划-区
-     *
-     * @since 0.0.1
-     */
-    private String idAddressArea;
+    private List<Region> regions = new ArrayList<>();
 
     /**
      * 详细地址（不包含省市区）
      *
      * @since 0.0.1
      */
-    private String idAddressLast;
+    private String addressLast;
 
     // ========================================= 以上是身份证（人像面）信息 =========================================
     // ========================================= 以下是身份证（国徽面）信息 =========================================

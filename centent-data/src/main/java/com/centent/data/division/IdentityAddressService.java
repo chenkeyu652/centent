@@ -2,6 +2,7 @@ package com.centent.data.division;
 
 import com.centent.core.exception.BusinessException;
 import com.centent.data.DataService;
+import com.centent.data.division.bean.Region;
 import com.centent.data.division.mapper.IdentityAddressChangeMapper;
 import com.centent.data.division.mapper.IdentityAddressMapper;
 import com.google.common.collect.Maps;
@@ -9,6 +10,7 @@ import com.google.common.collect.Sets;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@Order
 public class IdentityAddressService implements DataService {
 
     private static final Map<Integer, List<IdentityAddress>> IDENTITY_ADDRESS = Maps.newHashMap();
@@ -30,6 +33,9 @@ public class IdentityAddressService implements DataService {
 
     @Resource
     private IdentityAddressChangeMapper changeMapper;
+
+    @Resource
+    private RegionDataService regionDataService;
 
     @Override
     public String name() {
@@ -131,30 +137,19 @@ public class IdentityAddressService implements DataService {
         area.setProvince(province);
 
         Set<IdentityAddress> newest = this.findNewest(area);
-        if ((newest.size() == 1 && Objects.equals(newest.iterator().next(), area))) {
-            area.setCurrent(newest);
-            return area;
+        if (newest.size() > 1) {
+            log.debug("根据身份证地址{}匹配到多个现行行政区域，{}", identityAddress,
+                    newest.stream().map(n -> "[" + n.getCode() + "]" + n.getName()).collect(Collectors.joining(", ")));
         }
-
+        Set<Region> current = new HashSet<>();
         for (IdentityAddress newArea : newest) {
-            if (Objects.equals(newArea, area)) {
-                continue;
+            Region region = regionDataService.getArea(newArea.getCode());
+            if (Objects.isNull(region)) {
+                throw new BusinessException("无法根据身份证获取现行行政区域，identity：" + identity + "，找到的现行行政区域：" + newArea.getCode());
             }
-            assert newArea != null;
-            cityCode = newArea.getCode() - newArea.getCode() % 100;
-            provinceCode = newArea.getCode() - newArea.getCode() % 10000;
-            IdentityAddress newCity = this.matchBest(IDENTITY_ADDRESS.get(cityCode), identityAddress);
-            IdentityAddress newProvince = this.matchBest(IDENTITY_ADDRESS.get(provinceCode), identityAddress);
-            if (Objects.isNull(newProvince)) {
-                throw new BusinessException("无法获取身份证地址省份信息，identity1：" + identity + "，identityAddress：" + identityAddress);
-            }
-            if (Objects.isNull(newCity)) {
-                newCity = newProvince; // 直辖市特殊处理
-            }
-            newArea.setCity(newCity);
-            newArea.setProvince(newProvince);
+            current.add(region);
         }
-        area.setCurrent(newest);
+        area.setCurrent(current);
         return area;
     }
 

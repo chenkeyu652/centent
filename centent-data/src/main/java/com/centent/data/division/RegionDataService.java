@@ -5,6 +5,8 @@ import com.centent.data.division.bean.Region;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +24,14 @@ import java.util.Objects;
 
 @Slf4j
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class RegionDataService implements DataService {
-
 
     private static final String ORIGIN_FILE = "classpath:data/administrative_regions_2023.txt";
 
     private static final List<Region> REGIONS = new ArrayList<>();
+
+    private static final Map<Integer, Region> REGIONS_AREA = new HashMap<>();
 
     @Resource
     private ResourceLoader resourceLoader;
@@ -40,7 +45,6 @@ public class RegionDataService implements DataService {
     public void load() throws IOException {
         Map<Integer, Region> PROVINCES = new LinkedHashMap<>();
         Map<Integer, Region> CITIES = new LinkedHashMap<>();
-        Map<Integer, Region> AREAS = new LinkedHashMap<>();
 
         // 加载资源文件
         Map<Integer, String> data = new LinkedHashMap<>();
@@ -73,7 +77,7 @@ public class RegionDataService implements DataService {
                 int provinceCode = code - code % 10000;
                 int cityCode = code - code % 100;
                 Region province = process(PROVINCES, provinceCode, null);
-                Region area = process(AREAS, code, name);
+                Region area = process(REGIONS_AREA, code, name);
 
                 Region city;
                 if (data.containsKey(cityCode)) {
@@ -105,5 +109,12 @@ public class RegionDataService implements DataService {
 
     public List<Region> getRegions() {
         return REGIONS;
+    }
+
+    public Region getArea(Integer code) {
+        if (Objects.isNull(code) || !REGIONS_AREA.containsKey(code)) {
+            return null;
+        }
+        return REGIONS_AREA.get(code);
     }
 }

@@ -3,6 +3,7 @@ package com.centent.data.division;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.centent.core.define.BaseEntity;
+import com.centent.data.division.bean.Region;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -80,5 +81,5 @@ public class IdentityAddress extends BaseEntity {
      * @since 0.0.1
      */
     @JsonIgnore
-    private transient Set<IdentityAddress> current = new HashSet<>();
+    private transient Set<Region> current = new HashSet<>();
 }

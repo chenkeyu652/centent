@@ -30,7 +30,11 @@ public class CommonInterceptor implements Interceptor {
             Buffer requestBuffer = new Buffer();
             requestBody.writeTo(requestBuffer);
             log.debug("Request Content-Type: {}", requestBody.contentType());
-            log.debug("Request body: {}", requestBuffer.readString(StandardCharsets.UTF_8));
+            String bodyString = requestBuffer.readString(StandardCharsets.UTF_8);
+            if (bodyString.length() > 3000) {
+                bodyString = bodyString.substring(0, 3000);
+            }
+            log.debug("Request body: {}...", bodyString);
         }
 
         // 执行请求
