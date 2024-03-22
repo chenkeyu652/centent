@@ -37,8 +37,8 @@ public class WechatOfficialMenuController {
      * @see <a href="https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/Wechat_webpage_authorization.html">微信网页开发-网页授权</a>
      */
     @GetMapping("/redirect")
-    public void snsRedirect(@RequestParam String code,
-                            @RequestParam String state,
+    public void snsRedirect(@RequestParam("code") String code,
+                            @RequestParam("state") String state,
                             HttpServletResponse response) throws IOException {
         SNSToken snsToken = wechatOfficialChannel.getSNSToken(code);
         String viewUrl = wechatOfficialService.getViewUrl(state);

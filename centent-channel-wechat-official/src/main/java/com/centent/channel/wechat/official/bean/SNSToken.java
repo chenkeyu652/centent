@@ -10,17 +10,17 @@ import lombok.Data;
 @Data
 public class SNSToken {
 
-    private String accessToken;
+    private String access_token;
 
-    private Long expiresIn;
+    private Long expires_in;
 
-    private String refreshToken;
+    private String refresh_token;
 
     private String openid;
 
     private String scope;
 
-    private String isSnapshotuser;
+    private String is_snapshotuser;
 
     private String unionid;
 }
