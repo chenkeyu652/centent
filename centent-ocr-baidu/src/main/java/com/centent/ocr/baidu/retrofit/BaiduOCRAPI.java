@@ -39,4 +39,10 @@ public interface BaiduOCRAPI {
                                              @Field("vehicle_license_side") String licenseSide, // front or back
                                              @Field("image") String image, // image和url二选一，优先使用image
                                              @Field("url") String url);
+
+    @FormUrlEncoded
+    @POST("/rest/2.0/ocr/v1/vehicle_certificate")
+    Call<Map<String, Object>> vehicleCertificate(@Query("access_token") String access_token,
+                                                 @Field("image") String image, // image和url二选一，优先使用image
+                                                 @Field("url") String url);
 }

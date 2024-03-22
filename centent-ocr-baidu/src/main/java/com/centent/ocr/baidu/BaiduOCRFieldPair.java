@@ -1,6 +1,7 @@
 package com.centent.ocr.baidu;
 
 import com.centent.ocr.bean.Idcard;
+import com.centent.ocr.bean.VehicleCertificate;
 import com.centent.ocr.bean.VehicleLicence;
 import com.google.common.collect.ImmutableMap;
 
@@ -45,5 +46,36 @@ public class BaiduOCRFieldPair {
             .put("备注", VehicleLicence::setComment)
             .put("档案编号", VehicleLicence::setFileNo)
             .put("证芯编号", VehicleLicence::setBarcode)
+            .build();
+
+    static final Map<String, BiConsumer<VehicleCertificate, String>> VEHICLE_CERTIFICATE_PAIRS = ImmutableMap.<String, BiConsumer<VehicleCertificate, String>>builder()
+            .put("ManufactureDate", VehicleCertificate::setManufactureDate)
+            .put("CarColor", VehicleCertificate::setCarColor)
+            .put("LimitPassenger", VehicleCertificate::setLimitPassenger)
+            .put("EngineType", VehicleCertificate::setEngineType)
+            .put("TotalWeight", VehicleCertificate::setTotalWeight)
+            .put("Power", VehicleCertificate::setPower)
+            .put("CertificationNo", VehicleCertificate::setCertificationNo)
+            .put("FuelType", VehicleCertificate::setFuelType)
+            .put("Manufacturer", VehicleCertificate::setManufacturer)
+            .put("SteeringType", VehicleCertificate::setSteeringType)
+            .put("Wheelbase", VehicleCertificate::setWheelbase)
+            .put("SpeedLimit", VehicleCertificate::setSpeedLimit)
+            .put("EngineNo", VehicleCertificate::setEngineNo)
+            .put("SaddleMass", VehicleCertificate::setSaddleMass)
+            .put("AxleNum", VehicleCertificate::setAxleNum)
+            .put("CarModel", VehicleCertificate::setCarModel)
+            .put("VinNo", VehicleCertificate::setVin)
+            .put("CarBrand", VehicleCertificate::setCarBrand)
+            .put("EmissionStandard", VehicleCertificate::setEmissionStandard)
+            .put("Displacement", VehicleCertificate::setDisplacement)
+            .put("CertificateDate", VehicleCertificate::setCertificateDate)
+            .put("CarName", VehicleCertificate::setCarName)
+            .put("TyreNum", VehicleCertificate::setTyreNum)
+            .put("ChassisID", VehicleCertificate::setChassisId)
+            .put("ChassisModel", VehicleCertificate::setChassisModel)
+            .put("SeatingCapacity", VehicleCertificate::setSeatingCapacity)
+            .put("QualifySeal", VehicleCertificate::setQualifySeal)
+            .put("CGSSeal", VehicleCertificate::setCgsSeal)
             .build();
 }

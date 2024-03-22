@@ -7,6 +7,7 @@ import com.centent.core.util.JSONUtil;
 import com.centent.data.division.IdentityAddress;
 import com.centent.data.division.IdentityAddressService;
 import com.centent.ocr.bean.Idcard;
+import com.centent.ocr.bean.VehicleCertificate;
 import com.centent.ocr.bean.VehicleLicence;
 import com.centent.ocr.enums.Direction;
 import jakarta.annotation.Resource;
@@ -30,9 +31,11 @@ public abstract class IOCR {
      */
     public abstract String name();
 
-    public abstract Idcard idcard0(String base64, Direction direction);
+    protected abstract Idcard idcard0(String base64, Direction direction);
 
-    public abstract VehicleLicence vehicleLicence0(String base64, Direction direction);
+    protected abstract VehicleLicence vehicleLicence0(String base64, Direction direction);
+
+    protected abstract VehicleCertificate vehicleCertificate0(String base64);
 
     public final Idcard idcard(String base64, Direction direction) {
         Idcard idcard = this.idcard0(base64, direction);
@@ -76,6 +79,25 @@ public abstract class IOCR {
     public final VehicleLicence vehicleLicence(Direction direction, String filePath) {
         String base64 = FileUtil.getFileAsBase64(filePath, false);
         return this.vehicleLicence(base64, direction);
+    }
+
+    public final VehicleCertificate vehicleCertificate(String base64) {
+        return this.vehicleCertificate0(base64);
+    }
+
+    public final VehicleCertificate vehicleCertificate(Direction direction, MultipartFile image) {
+        String base64 = FileUtil.getFileAsBase64(image, false);
+        return this.vehicleCertificate(base64);
+    }
+
+    public final VehicleCertificate vehicleCertificate(MultipartFile image) {
+        String base64 = FileUtil.getFileAsBase64(image, false);
+        return this.vehicleCertificate(base64);
+    }
+
+    public final VehicleCertificate vehicleCertificate(File image) {
+        String base64 = FileUtil.getFileAsBase64(image, false);
+        return this.vehicleCertificate(base64);
     }
 
     // 根据身份证号码前6位解析身份证地址

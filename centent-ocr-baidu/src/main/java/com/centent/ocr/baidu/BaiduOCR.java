@@ -7,6 +7,7 @@ import com.centent.ocr.IOCR;
 import com.centent.ocr.baidu.config.BaiduOCRConfig;
 import com.centent.ocr.baidu.retrofit.BaiduOCRAPI;
 import com.centent.ocr.bean.Idcard;
+import com.centent.ocr.bean.VehicleCertificate;
 import com.centent.ocr.bean.VehicleLicence;
 import com.centent.ocr.enums.Direction;
 import com.google.common.cache.Cache;
@@ -113,6 +114,33 @@ public class BaiduOCR extends IOCR {
             });
 
             return vehicleLicence;
+        } catch (IOException e) {
+            throw new HttpRequestException("调用百度OCR错误，行驶证识别失败", e);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public VehicleCertificate vehicleCertificate0(String base64) {
+        String accessToken = this.getToken();
+
+        try {
+            Response<Map<String, Object>> response = api.vehicleCertificate(accessToken, base64, null)
+                    .execute();
+            Map<String, Object> body = response.body();
+            if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
+                throw new HttpRequestException("调用百度合格证OCR错误，response body is empty --> " + JSONUtil.toJSONString(body));
+            }
+
+            VehicleCertificate vehicleCertificate = new VehicleCertificate();
+            Map<String, Object> result = (Map<String, Object>) body.get("words_result");
+            result.forEach((key, value) -> {
+                if (BaiduOCRFieldPair.VEHICLE_CERTIFICATE_PAIRS.containsKey(key) && CententUtil.initialized(value)) {
+                    BaiduOCRFieldPair.VEHICLE_CERTIFICATE_PAIRS.get(key).accept(vehicleCertificate, String.valueOf(value));
+                }
+            });
+
+            return vehicleCertificate;
         } catch (IOException e) {
             throw new HttpRequestException("调用百度OCR错误，行驶证识别失败", e);
         }
