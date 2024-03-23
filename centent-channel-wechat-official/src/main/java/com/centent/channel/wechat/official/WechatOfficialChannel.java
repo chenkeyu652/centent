@@ -4,10 +4,12 @@ import com.centent.channel.IChannel;
 import com.centent.channel.NotifyContext;
 import com.centent.channel.wechat.official.bean.OfficialMenu;
 import com.centent.channel.wechat.official.bean.SNSToken;
+import com.centent.channel.wechat.official.bean.TemplateMessage;
 import com.centent.channel.wechat.official.config.WechatOfficialConfig;
 import com.centent.channel.wechat.official.retrofit.WechatOfficialAPI;
 import com.centent.core.enums.Channel;
 import com.centent.core.exception.HttpRequestException;
+import com.centent.core.exception.IllegalArgumentException;
 import com.centent.core.util.JSONUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -18,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -46,8 +49,36 @@ public class WechatOfficialChannel implements IChannel {
 
     @Override
     public void sendNotify(NotifyContext context) {
-        // TODO...发送微信通知
-        log.debug("我是微信公众号，代码还没写完，只能假装通知发成功了~");
+        String openid = context.getTarget();
+        if (Objects.isNull(openid)) {
+            throw new IllegalArgumentException("微信公众号发送消息失败，openid不能为空");
+        }
+
+        // TODO...需要先判断用户是否关注公众号
+
+        Map<String, String> params = context.getParams();
+        try {
+            Map<String, Map<String, String>> data = new HashMap<>();
+            config.getTemplateParams(context.getType())
+                    .forEach(key -> data.put(key, Map.of("value", params.get(key))));
+
+            TemplateMessage message = new TemplateMessage();
+            message.setTouser(openid);
+            message.setTemplate_id(config.getTemplateId(context.getType()));
+            message.setUrl(params.get("url"));
+            message.setData(data);
+            message.setClient_msg_id(System.currentTimeMillis() + "");
+
+            Response<WechatOfficialAPI.APIResult> response = api.sendTemplateMessage(this.getAccessToken(), message)
+                    .execute();
+            WechatOfficialAPI.APIResult body = response.body();
+            if (Objects.isNull(body) || !Objects.equals(body.getErrcode(), "0")) {
+                throw new HttpRequestException("调用微信公众号发送模板消息接口错误，response body --> " + JSONUtil.toJSONString(body));
+            }
+        } catch (IOException e) {
+            throw new HttpRequestException("调用微信公众号发送模板消息接口错误", e);
+        }
+
     }
 
     public void createMenu(OfficialMenu menu) {

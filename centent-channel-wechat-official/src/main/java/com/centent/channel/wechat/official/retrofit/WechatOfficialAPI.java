@@ -2,6 +2,7 @@ package com.centent.channel.wechat.official.retrofit;
 
 import com.centent.channel.wechat.official.bean.OfficialMenu;
 import com.centent.channel.wechat.official.bean.SNSToken;
+import com.centent.channel.wechat.official.bean.TemplateMessage;
 import lombok.Data;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -53,7 +54,7 @@ public interface WechatOfficialAPI {
     /**
      * 创建自定义菜单
      *
-     * @param accessToken 固定值：authorization_code
+     * @param accessToken Token
      * @param menu        参数数据
      * @return 响应数据，示例：{"errcode":0,"errmsg":"ok"}
      * @since 0.0.1
@@ -62,11 +63,26 @@ public interface WechatOfficialAPI {
     Call<APIResult> createMenu(@Query("access_token") String accessToken, @Body OfficialMenu menu);
 
 
+    /**
+     * 创建自定义菜单
+     *
+     * @param accessToken Token
+     * @param message     参数数据
+     * @return 响应数据，示例：{"errcode":0,"errmsg":"ok","msgid":"msgid"}
+     * @since 0.0.1
+     */
+    @POST("/cgi-bin/message/template/send")
+    Call<APIResult> sendTemplateMessage(@Query("access_token") String accessToken,
+                                        @Body TemplateMessage message);
+
+
     @Data
     class APIResult {
 
         private String errcode;
 
         private String errmsg;
+
+        private String msgid;
     }
 }

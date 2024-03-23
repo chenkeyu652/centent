@@ -3,9 +3,18 @@ package com.centent.channel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 public class NotifyContext {
+
+    /**
+     * 消息类型
+     *
+     * @since 0.0.1
+     */
+    private String type;
 
     /**
      * 消息接收人
@@ -15,16 +24,9 @@ public class NotifyContext {
     private String target;
 
     /**
-     * 消息标题
+     * 消息数据
      *
      * @since 0.0.1
      */
-    private String title;
-
-    /**
-     * 消息内容
-     *
-     * @since 0.0.1
-     */
-    private String content;
+    private Map<String, String> params;
 }

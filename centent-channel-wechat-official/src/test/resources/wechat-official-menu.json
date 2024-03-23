@@ -1,0 +1,10 @@
+{
+  "button": [
+    {
+      "type": "view",
+      "key": "createOrder",
+      "name": "新增订单",
+      "url": "/page/order/index.html?channel=1&owner={openid}"
+    }
+  ]
+}
