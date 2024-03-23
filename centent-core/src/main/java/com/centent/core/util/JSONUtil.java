@@ -4,6 +4,7 @@ import com.centent.core.configuration.JacksonMapperConfiguration.LocalDateTimest
 import com.centent.core.configuration.JacksonMapperConfiguration.LocalDateTimestampSerializer;
 import com.centent.core.define.IBaseEnum;
 import com.centent.core.define.IBaseEnum.IBaseEnumSerializer;
+import com.centent.core.exception.BusinessException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -61,9 +62,8 @@ public class JSONUtil {
         try {
             return OBJECT_MAPPER.readValue(json, TYPE_MAP);
         } catch (Exception e) {
-            log.error("", e);
+            throw new BusinessException(e);
         }
-        return null;
     }
 
     @SuppressWarnings("unchecked")
