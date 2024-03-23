@@ -62,7 +62,7 @@ public class BaiduOCR extends IOCR {
             ).execute();
             Map<String, Object> body = response.body();
             if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
-                throw new HttpRequestException("调用百度身份证OCR错误，response body is empty --> " + JSONUtil.toJSONString(body));
+                throw new HttpRequestException("调用百度身份证OCR错误，response body --> " + JSONUtil.toJSONString(body));
             }
 
             Idcard idcard = new Idcard();
@@ -100,7 +100,7 @@ public class BaiduOCR extends IOCR {
             ).execute();
             Map<String, Object> body = response.body();
             if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
-                throw new HttpRequestException("调用百度行驶证OCR错误，response body is empty --> " + JSONUtil.toJSONString(body));
+                throw new HttpRequestException("调用百度行驶证OCR错误，response body --> " + JSONUtil.toJSONString(body));
             }
 
             VehicleLicence vehicleLicence = new VehicleLicence();
@@ -129,7 +129,7 @@ public class BaiduOCR extends IOCR {
                     .execute();
             Map<String, Object> body = response.body();
             if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
-                throw new HttpRequestException("调用百度合格证OCR错误，response body is empty --> " + JSONUtil.toJSONString(body));
+                throw new HttpRequestException("调用百度合格证OCR错误，response body --> " + JSONUtil.toJSONString(body));
             }
 
             VehicleCertificate vehicleCertificate = new VehicleCertificate();
