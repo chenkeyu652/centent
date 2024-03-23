@@ -52,6 +52,17 @@ public interface WechatOfficialAPI {
                                @Query("code") String code);
 
     /**
+     * 通过网页授权Token和用户唯一标识openid获取用户信息
+     *
+     * @param snsAccessToken 网页授权Token
+     * @param openId         用户唯一标识
+     * @return 响应数据，示例：{"subscribe":1,"openid":"用户唯一标识","subscribe_time":"13位时间戳","unionid":"用户unionid","tagid_list":[123,2],},
+     */
+    @GET("/cgi-bin/user/info")
+    Call<SNSToken> getUserInfo(@Query("access_token") String snsAccessToken,
+                               @Query("openid") String openId);
+
+    /**
      * 创建自定义菜单
      *
      * @param accessToken Token
@@ -64,7 +75,7 @@ public interface WechatOfficialAPI {
 
 
     /**
-     * 创建自定义菜单
+     * 发送模板消息
      *
      * @param accessToken Token
      * @param message     参数数据

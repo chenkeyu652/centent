@@ -6,8 +6,12 @@ import com.centent.channel.wechat.official.bean.OfficialMenu;
 import com.centent.channel.wechat.official.bean.SNSToken;
 import com.centent.channel.wechat.official.bean.TemplateMessage;
 import com.centent.channel.wechat.official.config.WechatOfficialConfig;
+import com.centent.channel.wechat.official.entity.WechatOfficialUser;
+import com.centent.channel.wechat.official.enums.UserStatus;
 import com.centent.channel.wechat.official.retrofit.WechatOfficialAPI;
+import com.centent.channel.wechat.official.service.WechatOfficialUserService;
 import com.centent.core.enums.Channel;
+import com.centent.core.exception.BusinessException;
 import com.centent.core.exception.HttpRequestException;
 import com.centent.core.exception.IllegalArgumentException;
 import com.centent.core.util.JSONUtil;
@@ -42,9 +46,31 @@ public class WechatOfficialChannel implements IChannel {
     @Resource
     private WechatOfficialAPI api;
 
+    @Resource
+    private WechatOfficialUserService userService;
+
     @Override
     public Channel channel() {
         return Channel.WECHAT_OFFICE;
+    }
+
+    @Override
+    public boolean available(String owner) {
+        this.config(owner);
+        return true;
+    }
+
+    @Override
+    public Object config(String owner) {
+        WechatOfficialUser user = userService.getIfExistByOpenid(owner);
+        if (Objects.isNull(user) || user.getStatus() == UserStatus.UNSUBSCRIBE) {
+            throw new BusinessException("请关注本微信公众号后再使用，谢谢");
+        }
+        if (!user.isAvailable()) {
+            log.debug("用户已被禁用但仍然尝试使用本微信公众号，openid={}", owner);
+            throw new HttpRequestException("系统繁忙，请稍后再试");
+        }
+        return user;
     }
 
     @Override

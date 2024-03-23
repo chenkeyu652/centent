@@ -2,6 +2,9 @@ package com.centent.channel.wechat.official.service;
 
 import com.centent.channel.wechat.official.bean.OfficialMenu;
 import com.centent.channel.wechat.official.config.WechatOfficialConfig;
+import com.centent.channel.wechat.official.entity.WechatOfficialUser;
+import com.centent.channel.wechat.official.enums.UserRule;
+import com.centent.channel.wechat.official.enums.UserStatus;
 import com.centent.core.exception.BusinessException;
 import com.centent.core.util.CententUtil;
 import com.centent.core.util.JSONUtil;
@@ -17,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -29,6 +33,9 @@ public class WechatOfficialService {
 
     @Resource
     private WechatOfficialConfig config;
+
+    @Resource
+    private WechatOfficialUserService userService;
 
     public OfficialMenu refreshMenus() {
         log.info("加载微信公众号菜单配置中...");
@@ -85,7 +92,8 @@ public class WechatOfficialService {
         if (button.isValidView()) {
             if (VIEW_MENUS.containsKey(button.getKey())) {
                 OfficialMenu.Button repeat = VIEW_MENUS.get(button.getKey());
-                throw new BusinessException("菜单key重复：key=" + button.getKey() + "，name1：" + button.getName() + "，name2：" + repeat.getName());
+                throw new BusinessException("菜单key重复：key=" + button.getKey() +
+                        "，name1：" + button.getName() + "，name2：" + repeat.getName());
             }
 
             button.setOriginalUrl(button.getUrl());
@@ -96,6 +104,51 @@ public class WechatOfficialService {
                     + "&response_type=code&scope=snsapi_base&state=" + button.getKey() + "#wechat_redirect";
             button.setUrl(URLEncoder.encode(url, StandardCharsets.UTF_8));
             VIEW_MENUS.put(button.getKey(), button);
+        }
+    }
+
+    /**
+     * 用户订阅公众号事件
+     *
+     * @param params XML解析数据
+     * @since 0.0.1
+     */
+    public void subscribe(Map<String, String> params) {
+        String openid = params.get("FromUserName");
+        WechatOfficialUser user = userService.getIfExistByOpenid(openid);
+        if (Objects.nonNull(user)) {
+            if (user.getStatus() == UserStatus.UNSUBSCRIBE
+                    || user.getStatus() == UserStatus.FORBIDDEN_UNSUBSCRIBE) {
+                user.setStatus(user.getStatus().reverse());
+                userService.update(user);
+                log.debug("触发微信事件：用户取关后重新订阅公众号，openid={}", openid);
+            }
+        } else {
+            user = new WechatOfficialUser();
+            user.setOpenid(openid);
+            user.setStatus(UserStatus.SUBSCRIBE);
+            user.setRule(UserRule.NORMAL); // 默认是普通用户
+            userService.insert(user);
+            log.debug("触发微信事件：用户首次订阅公众号，openid={}", openid);
+        }
+    }
+
+    /**
+     * 用户取消订阅公众号事件
+     *
+     * @param params XML解析数据
+     * @since 0.0.1
+     */
+    public void unsubscribe(Map<String, String> params) {
+        String openid = params.get("FromUserName");
+        WechatOfficialUser user = userService.getIfExistByOpenid(openid);
+        if (Objects.nonNull(user)) {
+            if (user.getStatus() == UserStatus.SUBSCRIBE
+                    || user.getStatus() == UserStatus.FORBIDDEN_SUBSCRIBE) {
+                user.setStatus(user.getStatus().reverse());
+                userService.update(user);
+                log.debug("触发微信事件：用户取消订阅，openid={}", openid);
+            }
         }
     }
 }

@@ -30,6 +30,13 @@ public class WechatOfficialConfig {
     private String authDomain;
 
     /**
+     * 接口配置Token
+     *
+     * @since 0.0.1
+     */
+    private String apiToken;
+
+    /**
      * 微信公众号id
      *
      * @since 0.0.1
