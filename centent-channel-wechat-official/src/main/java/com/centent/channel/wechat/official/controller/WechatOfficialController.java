@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/wechat/official")
+@RequestMapping("centent/wechat/official")
 public class WechatOfficialController {
 
     /**
