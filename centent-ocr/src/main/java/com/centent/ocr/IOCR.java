@@ -85,6 +85,10 @@ public abstract class IOCR {
         return this.vehicleCertificate0(base64);
     }
 
+    public final VehicleCertificate vehicleCertificate(String base64, Direction direction) {
+        return this.vehicleCertificate0(base64);
+    }
+
     public final VehicleCertificate vehicleCertificate(Direction direction, MultipartFile image) {
         String base64 = FileUtil.getFileAsBase64(image, false);
         return this.vehicleCertificate(base64);
