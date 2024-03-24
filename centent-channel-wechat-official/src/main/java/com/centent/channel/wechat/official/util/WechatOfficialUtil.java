@@ -1,10 +1,19 @@
 package com.centent.channel.wechat.official.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -64,8 +73,32 @@ public class WechatOfficialUtil {
         return new String(tempArr);
     }
 
-    public static Map<String, String> parseXml(String body) {
-        // TODO... 解析XML消息
-        return null;
+    /**
+     * xml文件中的数据转换我Map<String,Object>中的数据
+     *
+     * @param xml xml格式的字符串
+     * @return Map<String, String>
+     * @throws Exception Exception
+     */
+    public static Map<String, String> parseXml(String xml) throws Exception {
+        Map<String, String> map = new HashMap<>();
+
+        byte[] xmlBytes = xml.getBytes(StandardCharsets.UTF_8);
+        try (InputStream is = new ByteArrayInputStream(xmlBytes)) {
+            // 这里用Dom的方式解析回包的最主要目的是防止API新增回包字段
+            Document document = DocumentBuilderFactory.newInstance()
+                    .newDocumentBuilder()
+                    .parse(is);
+
+            // 获取到document里面的全部结点
+            NodeList allNodes = document.getFirstChild().getChildNodes();
+            for (int i = 0; i < allNodes.getLength(); i++) {
+                Node node = allNodes.item(i);
+                if (node instanceof Element) {
+                    map.put(node.getNodeName(), node.getTextContent());
+                }
+            }
+        }
+        return map;
     }
 }

@@ -51,21 +51,25 @@ public class WechatOfficialController {
             String body = null;
             try {
                 body = this.readRequestBody(request);
+                log.debug("接收到的微信消息：{}", body);
                 Map<String, String> map = WechatOfficialUtil.parseXml(body);
                 if (CollectionUtils.isEmpty(map)) {
                     throw new BusinessException("没有解析到有效的xml数据");
                 }
                 // 处理微信事件类型消息
                 if (Objects.equals(map.get("MsgType"), "event")) {
-                    EventType type = EventType.getEventType(map.get("Event"));
+                    String event = map.get("Event");
+                    EventType type = EventType.getEventType(event);
                     if (Objects.nonNull(type)) {
                         type.getConsumer().accept(service, map);
+                        return "";
                     }
                 }
+                log.info("未做处理的微信消息：{}", body);
             } catch (Exception e) {
                 log.error("处理微信消息异常, body=" + body, e);
             }
-            return "success";
+            return "";
         }
     }
 
