@@ -22,6 +22,8 @@ public class JSONUtil {
 
     private static final JavaType TYPE_MAP;
 
+    private static final JavaType TYPE_MAP_STRING;
+
     static {
         SimpleModule module = new SimpleModule();
         // IBaseEnum 枚举字段添加翻译字段
@@ -35,6 +37,8 @@ public class JSONUtil {
         // OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         TYPE_MAP = OBJECT_MAPPER.getTypeFactory().constructMapType(Map.class, String.class, Object.class);
+
+        TYPE_MAP_STRING = OBJECT_MAPPER.getTypeFactory().constructMapType(Map.class, String.class, String.class);
     }
 
     public static String toJSONString(Object object) {
@@ -61,6 +65,14 @@ public class JSONUtil {
     public static Map<String, Object> json2Map(String json) {
         try {
             return OBJECT_MAPPER.readValue(json, TYPE_MAP);
+        } catch (Exception e) {
+            throw new BusinessException(e);
+        }
+    }
+
+    public static Map<String, String> json2MapString(String json) {
+        try {
+            return OBJECT_MAPPER.readValue(json, TYPE_MAP_STRING);
         } catch (Exception e) {
             throw new BusinessException(e);
         }

@@ -91,7 +91,9 @@ public class WechatOfficialChannel implements IChannel {
             TemplateMessage message = new TemplateMessage();
             message.setTouser(openid);
             message.setTemplate_id(config.getTemplateId(context.getType()));
-            message.setUrl(params.get("url"));
+            if (params.containsKey("url")) {
+                message.setUrl(params.get("url"));
+            }
             message.setData(data);
             message.setClient_msg_id(System.currentTimeMillis() + "");
 
