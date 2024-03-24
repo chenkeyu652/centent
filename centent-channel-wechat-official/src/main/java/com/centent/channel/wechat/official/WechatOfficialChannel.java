@@ -92,7 +92,11 @@ public class WechatOfficialChannel implements IChannel {
             message.setTouser(openid);
             message.setTemplate_id(config.getTemplateId(context.getType()));
             if (params.containsKey("url")) {
-                message.setUrl(params.get("url"));
+                String url = params.get("url");
+                if (!url.startsWith("http")) {
+                    url = config.getAuthDomain() + url;
+                }
+                message.setUrl(url);
             }
             message.setData(data);
             message.setClient_msg_id(System.currentTimeMillis() + "");
