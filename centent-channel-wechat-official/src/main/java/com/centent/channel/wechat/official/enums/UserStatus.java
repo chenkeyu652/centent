@@ -12,7 +12,7 @@ public enum UserStatus implements IBaseEnum {
 
     UNSUBSCRIBE(1, "未关注"),
 
-    SUBSCRIBE(1, "已关注");
+    SUBSCRIBE(2, "已关注");
 
     private final Integer value;
 
