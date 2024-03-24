@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS wechat_official_user
     openid      VARCHAR(255) UNIQUE NOT NULL,
     unionid     VARCHAR(255),
     nickname    VARCHAR(255),
-    state       INT                 NOT NULL,
+    status      INT                 NOT NULL,
     rule        INT                 NOT NULL,
     remark      VARCHAR(4000),
     create_time TIMESTAMP           NOT NULL,
@@ -16,7 +16,7 @@ COMMENT ON COLUMN wechat_official_user.id IS '主键';
 COMMENT ON COLUMN wechat_official_user.openid IS '用户openid';
 COMMENT ON COLUMN wechat_official_user.unionid IS '用户unionid';
 COMMENT ON COLUMN wechat_official_user.nickname IS '用户昵称';
-COMMENT ON COLUMN wechat_official_user.state IS '用户状态';
+COMMENT ON COLUMN wechat_official_user.status IS '用户状态';
 COMMENT ON COLUMN wechat_official_user.rule IS '用户角色';
 COMMENT ON COLUMN wechat_official_user.remark IS '备注';
 COMMENT ON COLUMN wechat_official_user.create_time IS '创建时间';
