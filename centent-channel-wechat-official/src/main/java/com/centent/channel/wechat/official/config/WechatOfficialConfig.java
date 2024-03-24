@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Data
 @Configuration
@@ -65,7 +64,7 @@ public class WechatOfficialConfig {
         return templates.get(key).getId();
     }
 
-    public Set<String> getTemplateParams(String key) {
+    public Map<String, String> getTemplateParams(String key) {
         this.getTemplateId(key);
         return templates.get(key).getParams();
     }
@@ -75,6 +74,6 @@ public class WechatOfficialConfig {
 
         private String id;
 
-        private Set<String> params;
+        private Map<String, String> params;
     }
 }

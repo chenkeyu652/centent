@@ -86,7 +86,7 @@ public class WechatOfficialChannel implements IChannel {
         try {
             Map<String, Map<String, String>> data = new HashMap<>();
             config.getTemplateParams(context.getType())
-                    .forEach(key -> data.put(key, Map.of("value", params.get(key))));
+                    .forEach((key, defaultValue) -> data.put(key, Map.of("value", params.getOrDefault(key, defaultValue))));
 
             TemplateMessage message = new TemplateMessage();
             message.setTouser(openid);
