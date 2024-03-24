@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(value = HttpRequestException.class)
-    public Result<Object> businessException(HttpServletRequest request, HttpRequestException e) {
+    public Result<Object> httpRequestException(HttpServletRequest request, HttpRequestException e) {
         log.error(e.getMessage(), e);
         return Result.error(e.getCode(), e.getMessage());
     }
@@ -117,6 +117,7 @@ public class GlobalExceptionHandler {
     private void commonHandle(HttpServletRequest request, Exception e) {
         log.error(String.format("[%s] %s ---> %s: %s",
                 request.getMethod(), request.getRequestURI(), e.getClass().getSimpleName(), e.getMessage()));
+        log.debug(e.getMessage(), e);
     }
 
     private ModelAndView jsonResult(int code, String msg) {
