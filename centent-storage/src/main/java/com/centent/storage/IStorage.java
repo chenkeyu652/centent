@@ -17,9 +17,9 @@ public abstract class IStorage {
     @Resource
     private AttachmentMapper attachmentMapper;
 
-    protected abstract void upload0(Attachment attachment, File file) throws IOException;
+    protected abstract File upload0(Attachment attachment, File file) throws IOException;
 
-    protected abstract void upload0(Attachment attachment, MultipartFile file) throws IOException;
+    protected abstract File upload0(Attachment attachment, MultipartFile file) throws IOException;
 
     protected abstract File get0(Attachment attachment);
 
@@ -38,10 +38,14 @@ public abstract class IStorage {
         // 上传时间和更新时间一致，标识该文件为新文件，需要执行文件上传
         if (attachment.getCreateTime().isEqual(attachment.getUpdateTime())) {
             try {
-                this.upload0(attachment, file);
+                File destFile = this.upload0(attachment, file);
+                attachment.setFile(destFile);
             } catch (IOException e) {
                 throw new BusinessException("上传文件失败！", e);
             }
+        } else {
+            File destFile = this.get(attachment.getId());
+            attachment.setFile(destFile);
         }
         return attachment;
     }
@@ -56,10 +60,14 @@ public abstract class IStorage {
         // 上传时间和更新时间一致，标识该文件为新文件，需要执行文件上传
         if (attachment.getCreateTime().isEqual(attachment.getUpdateTime())) {
             try {
-                this.upload0(attachment, file);
+                File destFile = this.upload0(attachment, file);
+                attachment.setFile(destFile);
             } catch (IOException e) {
                 throw new BusinessException("上传文件失败！", e);
             }
+        } else {
+            File destFile = this.get(attachment.getId());
+            attachment.setFile(destFile);
         }
         return attachment;
     }

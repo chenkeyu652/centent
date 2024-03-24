@@ -85,8 +85,8 @@ public abstract class IOCR {
         return this.vehicleCertificate0(base64);
     }
 
-    public final VehicleCertificate vehicleCertificate(String base64, Direction direction) {
-        return this.vehicleCertificate0(base64);
+    public final VehicleCertificate vehicleCertificate(Direction direction, File image) {
+        return this.vehicleCertificate(image);
     }
 
     public final VehicleCertificate vehicleCertificate(Direction direction, MultipartFile image) {

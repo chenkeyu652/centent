@@ -2,9 +2,12 @@ package com.centent.storage.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.centent.core.define.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.logging.log4j.util.Strings;
+
+import java.io.File;
 
 @Data
 @TableName("attachment")
@@ -31,6 +34,9 @@ public class Attachment extends BaseEntity {
      * @since 0.0.1
      */
     private Long size;
+
+    @JsonIgnore
+    private transient File file;
 
     public Attachment(String hash) {
         this.id = hash;

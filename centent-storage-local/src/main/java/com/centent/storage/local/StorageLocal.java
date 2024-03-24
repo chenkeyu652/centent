@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class StorageLocal extends IStorage {
 
@@ -31,14 +32,23 @@ public class StorageLocal extends IStorage {
     }
 
     @Override
-    public void upload0(Attachment attachment, File file) {
+    public File upload0(Attachment attachment, File file) {
+        // 保存文件到dest下
+        File destFile = new File(dest, attachment.getStoredFileName());
+        try {
+            Files.copy(file.toPath(), destFile.toPath());
+        } catch (IOException e) {
+            throw new BusinessException(e);
+        }
+        return destFile;
     }
 
     @Override
-    public void upload0(Attachment attachment, MultipartFile file) throws IOException {
+    public File upload0(Attachment attachment, MultipartFile file) throws IOException {
         // 保存文件到dest下
         File destFile = new File(dest, attachment.getStoredFileName());
         file.transferTo(destFile);
+        return destFile;
     }
 
     @Override
