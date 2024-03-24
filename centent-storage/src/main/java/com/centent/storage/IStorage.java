@@ -95,7 +95,11 @@ public abstract class IStorage {
         attachment.setName(name);
 
         if (name.contains(".")) {
-            attachment.setType(name.substring(name.lastIndexOf(".") + 1));
+            String type = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
+            if (Objects.equals("jpeg", type)) {
+                type = "jpg";
+            }
+            attachment.setType(type);
         }
         if (exists) {
             attachmentMapper.updateById(attachment);
