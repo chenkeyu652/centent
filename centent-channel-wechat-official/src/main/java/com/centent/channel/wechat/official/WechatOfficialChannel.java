@@ -1,5 +1,6 @@
 package com.centent.channel.wechat.official;
 
+import com.centent.cache.ICache;
 import com.centent.channel.IChannel;
 import com.centent.channel.NotifyContext;
 import com.centent.channel.wechat.official.bean.OfficialMenu;
@@ -15,8 +16,6 @@ import com.centent.core.exception.BusinessException;
 import com.centent.core.exception.HttpRequestException;
 import com.centent.core.exception.IllegalArgumentException;
 import com.centent.core.util.JSONUtil;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,18 +26,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 public class WechatOfficialChannel implements IChannel {
 
-    // 微信公众号的access_token过期时间是7200秒
-    private static final Cache<String, String> ACCESS_TOKEN_CACHE = CacheBuilder.newBuilder()
-            .expireAfterWrite(7000, TimeUnit.SECONDS)
-            .maximumSize(1)
-            .build();
+    // 微信公众号的access_token过期时间是7200秒，我们这里设置7000秒
+    public static final String WECHAT_OFFICIAL_TOKEN_CACHE_KEY = "WECHAT_OFFICIAL_ACCESS_TOKEN";
 
     @Resource
     private WechatOfficialConfig config;
@@ -48,6 +42,9 @@ public class WechatOfficialChannel implements IChannel {
 
     @Resource
     private WechatOfficialUserService userService;
+
+    @Resource
+    private ICache cache;
 
     @Override
     public Channel channel() {
@@ -99,7 +96,7 @@ public class WechatOfficialChannel implements IChannel {
                 message.setUrl(url);
             }
             message.setData(data);
-            message.setClient_msg_id(System.currentTimeMillis() + "");
+            message.setClient_msg_id(String.valueOf(System.currentTimeMillis()));
 
             Response<WechatOfficialAPI.APIResult> response = api.sendTemplateMessage(this.getAccessToken(), message)
                     .execute();
@@ -127,22 +124,18 @@ public class WechatOfficialChannel implements IChannel {
     }
 
     private String getAccessToken() {
-        try {
-            return ACCESS_TOKEN_CACHE.get("access_token", () -> {
-                Response<Map<String, String>> response = api.getAPIToken(
-                        WechatOfficialAPI.API_GRANT_TYPE,
-                        config.getAppId(), config.getAppSecret()
-                ).execute();
+        return cache.get(WECHAT_OFFICIAL_TOKEN_CACHE_KEY, 7000, () -> {
+            Response<Map<String, String>> response = api.getAPIToken(
+                    WechatOfficialAPI.API_GRANT_TYPE,
+                    config.getAppId(), config.getAppSecret()
+            ).execute();
 
-                Map<String, String> body = response.body();
-                if (CollectionUtils.isEmpty(body) || !body.containsKey("access_token")) {
-                    throw new HttpRequestException("调用微信公众号接口错误，response body --> " + JSONUtil.toJSONString(body));
-                }
-                return body.get("access_token");
-            });
-        } catch (ExecutionException e) {
-            throw new HttpRequestException("调用微信公众号接口错误，获取access_token失败", e);
-        }
+            Map<String, String> body = response.body();
+            if (CollectionUtils.isEmpty(body) || !body.containsKey("access_token")) {
+                throw new HttpRequestException("调用微信公众号接口错误，response body --> " + JSONUtil.toJSONString(body));
+            }
+            return body.get("access_token");
+        });
     }
 
     public SNSToken getSNSToken(String code) {

@@ -3,6 +3,7 @@ package com.centent.core.handler;
 import com.centent.core.bean.Result;
 import com.centent.core.exception.AuthorizedException;
 import com.centent.core.exception.BusinessException;
+import com.centent.core.exception.CacheException;
 import com.centent.core.exception.HttpRequestException;
 import com.centent.core.exception.IllegalArgumentException;
 import com.centent.core.exception.NotFoundException;
@@ -39,20 +40,13 @@ import java.util.concurrent.TimeUnit;
 public class GlobalExceptionHandler {
 
     private static final Cache<String, Boolean> INTERFACE_CACHE = CacheBuilder.newBuilder()
-            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .expireAfterWrite(1, TimeUnit.DAYS)
             .maximumSize(500)
             .build();
 
     @RequestMapping("/error")
     public Result<Void> error() {
         return Result.error();
-    }
-
-    @ResponseBody
-    @ExceptionHandler(value = HttpRequestException.class)
-    public Result<Object> httpRequestException(HttpServletRequest request, HttpRequestException e) {
-        log.error(e.getMessage(), e);
-        return Result.error(e.getCode(), e.getMessage());
     }
 
     @ResponseBody
@@ -65,6 +59,13 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(value = UnimportantException.class)
     public Result<Object> unimportantException(HttpServletRequest request, UnimportantException e) {
+        return Result.error(e.getCode(), e.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = {CacheException.class, HttpRequestException.class})
+    public Result<Object> importantException(HttpServletRequest request, BusinessException e) {
+        log.error(e.getMessage(), e); // 打印完整堆栈
         return Result.error(e.getCode(), e.getMessage());
     }
 

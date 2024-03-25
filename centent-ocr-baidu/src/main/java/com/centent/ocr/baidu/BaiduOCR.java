@@ -1,5 +1,6 @@
 package com.centent.ocr.baidu;
 
+import com.centent.cache.ICache;
 import com.centent.core.exception.HttpRequestException;
 import com.centent.core.util.CententUtil;
 import com.centent.core.util.JSONUtil;
@@ -10,8 +11,6 @@ import com.centent.ocr.bean.Idcard;
 import com.centent.ocr.bean.VehicleCertificate;
 import com.centent.ocr.bean.VehicleLicence;
 import com.centent.ocr.enums.Direction;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -20,24 +19,23 @@ import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class BaiduOCR extends IOCR {
 
-    // 百度access token缓存，access_token的有效期为30天，需要每30天进行定期更换 --- 官方文档说明
+    // 百度access token缓存前缀，access_token的有效期为30天，需要每30天进行定期更换 --- 官方文档说明
     // 见：https://ai.baidu.com/ai-doc/OCR/Ck3h7y2ia#%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F%E4%B8%80
-    private static final Cache<String, String> BAIDU_TOKEN_CACHE = CacheBuilder.newBuilder()
-            .expireAfterWrite(29, TimeUnit.DAYS)
-            .maximumSize(1)
-            .build();
+    public static final String BAIDU_OCR_TOKEN_CACHE_KEY = "BAIDU_OCR_ACCESS_TOKEN";
 
     @Resource
     private BaiduOCRAPI api;
 
     @Resource
     private BaiduOCRConfig config;
+
+    @Resource
+    private ICache cache;
 
     @Override
     public String name() {
@@ -147,20 +145,16 @@ public class BaiduOCR extends IOCR {
     }
 
     private String getToken() {
-        try {
-            return BAIDU_TOKEN_CACHE.get("access_token", () -> {
-                log.info("百度OCR access_token 无效或过期，重新获取");
-                Response<Map<String, String>> response = api.getToken(BaiduOCRAPI.GRANT_TYPE, config.getApiKey(), config.getSecretKey())
-                        .execute();
-                Map<String, String> body = response.body();
-                if (CollectionUtils.isEmpty(body) || !body.containsKey("access_token")) {
-                    throw new HttpRequestException("调用百度OCR错误，获取access_token失败，response body: " + JSONUtil.toJSONString(body));
-                }
-                return body.get("access_token");
-            });
-        } catch (ExecutionException e) {
-            throw new HttpRequestException("调用百度OCR错误，获取access_token失败", e);
-        }
+        return cache.get(BAIDU_OCR_TOKEN_CACHE_KEY, 29, TimeUnit.DAYS, () -> {
+            log.info("百度OCR access_token 无效或过期，重新获取");
+            Response<Map<String, String>> response = api.getToken(BaiduOCRAPI.GRANT_TYPE, config.getApiKey(), config.getSecretKey())
+                    .execute();
+            Map<String, String> body = response.body();
+            if (CollectionUtils.isEmpty(body) || !body.containsKey("access_token")) {
+                throw new HttpRequestException("调用百度OCR错误，获取access_token失败，response body: " + JSONUtil.toJSONString(body));
+            }
+            return body.get("access_token");
+        });
     }
 
     @Data

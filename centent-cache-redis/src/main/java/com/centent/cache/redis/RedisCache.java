@@ -4,8 +4,11 @@ import com.centent.cache.ICache;
 import com.centent.core.util.CententUtil;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -14,7 +17,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class RedisCache implements ICache {
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class RedisCache extends ICache {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
@@ -55,12 +60,7 @@ public class RedisCache implements ICache {
         return Boolean.TRUE.equals(redisTemplate.hasKey(this.getKey(key)));
     }
 
-    public <V> Boolean setNx(String key, V value, long expire) {
-        return redisTemplate.opsForValue()
-                .setIfAbsent(this.getKey(key), value, expire, TimeUnit.SECONDS);
-    }
-
-    public <V> Boolean setNx(String key, V value, long expire, long timeout) {
+    public <V> Boolean lock(String key, V value, long expire, long timeout) {
         long start = System.currentTimeMillis();
         // 在一定时间内获取锁，超时则返回错误
         for (; ; ) {
@@ -71,13 +71,20 @@ public class RedisCache implements ICache {
                 return true;
             }
             // 否则循环等待，在timeout时间内仍未获取到锁，则获取失败
-            if (System.currentTimeMillis() - start > timeout) {
+            if (timeout > 0 && System.currentTimeMillis() - start > timeout) {
                 return false;
+            }
+
+            // 没有超时，等待一段时间后，继续尝试获取锁
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
-    public <V> boolean releaseNx(String key, V value) {
+    public <V> boolean unlock(String key, V value) {
         String storeKey = this.getKey(key);
         Object currentValue = redisTemplate.opsForValue().get(storeKey);
         if (Objects.equals(value, currentValue)) {
@@ -86,7 +93,7 @@ public class RedisCache implements ICache {
         return false;
     }
 
-    protected String getKey(String key) {
+    public String getKey(String key) {
         if (CententUtil.uninitialized(key)) {
             throw new IllegalArgumentException("缓存的key不能为空");
         }

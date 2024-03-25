@@ -16,6 +16,10 @@
             <groupId>com.centent</groupId>
             <artifactId>centent-ocr</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.centent</groupId>
+            <artifactId>centent-cache</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>

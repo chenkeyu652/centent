@@ -1,6 +1,5 @@
 package com.centent.cache.redis;
 
-import com.centent.cache.ICache;
 import com.centent.core.configuration.JacksonMapperConfiguration.LocalDateTimestampDeserializer;
 import com.centent.core.configuration.JacksonMapperConfiguration.LocalDateTimestampSerializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -11,7 +10,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -59,11 +57,5 @@ public class RedisCacheConfiguration {
         objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
 
         return new GenericJackson2JsonRedisSerializer(objectMapper);
-    }
-
-    @Bean
-    @Primary // 设置为主缓存
-    public ICache redisCache() {
-        return new RedisCache();
     }
 }

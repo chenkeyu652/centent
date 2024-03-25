@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public interface ICache {
+public abstract class ICache {
 
     /**
      * @param key      缓存的键值
@@ -14,26 +14,13 @@ public interface ICache {
      * @param timeout  时间
      * @param timeUnit 时间颗粒度
      */
-    <V> void save(final String key, final V value, final Integer timeout, final TimeUnit timeUnit);
+    public abstract <V> void save(final String key, final V value, final Integer timeout, final TimeUnit timeUnit);
 
-    /**
-     * 缓存对象
-     *
-     * @param key   缓存的键值
-     * @param value 缓存的值
-     */
-    default <V> void save(final String key, final V value) {
+    public final <V> void save(final String key, final V value) {
         this.save(key, value, null, null);
     }
 
-    /**
-     * 缓存对象
-     *
-     * @param key     缓存的键值
-     * @param value   缓存的值
-     * @param timeout 时间
-     */
-    default <V> void save(final String key, final V value, final Integer timeout) {
+    public final <V> void save(final String key, final V value, final Integer timeout) {
         this.save(key, value, timeout, TimeUnit.SECONDS);
     }
 
@@ -43,18 +30,19 @@ public interface ICache {
      * @param key 缓存键值
      * @return 缓存键值对应的数据
      */
-    <V> V get(final String key);
+    public abstract <V> V get(final String key);
 
     /**
-     * 获得缓存对象
+     * 获得缓存对象，获取不到时执行loader写入缓存
      *
      * @param key      缓存键值
      * @param timeout  时间
      * @param timeUnit 时间颗粒度
+     * @param loader   设置缓存的实现
      * @return 缓存键值对应的数据
      */
     @SuppressWarnings("unchecked")
-    default <V> V get(final String key, final Integer timeout, final TimeUnit timeUnit, final Callable<V> loader) {
+    public <V> V get(final String key, final Integer timeout, final TimeUnit timeUnit, final Callable<V> loader) {
         if (this.hasKey(key)) {
             return (V) this.get(key);
         }
@@ -62,30 +50,17 @@ public interface ICache {
         try {
             value = loader.call();
         } catch (Exception e) {
-            throw new BusinessException(e);
+            throw new BusinessException("缓存写入执行失败：" + key, e);
         }
         this.save(key, value, timeout, timeUnit);
         return value;
     }
 
-    /**
-     * 获得缓存对象
-     *
-     * @param key     缓存键值
-     * @param timeout 时间
-     * @return 缓存键值对应的数据
-     */
-    default <V> V get(final String key, final Integer timeout, final Callable<V> loader) {
+    public final <V> V get(final String key, final Integer timeout, final Callable<V> loader) {
         return this.get(key, timeout, TimeUnit.SECONDS, loader);
     }
 
-    /**
-     * 获得缓存对象
-     *
-     * @param key 缓存键值
-     * @return 缓存键值对应的数据
-     */
-    default <V> V get(final String key, final Callable<V> loader) {
+    public final <V> V get(final String key, final Callable<V> loader) {
         return this.get(key, null, null, loader);
     }
 
@@ -95,7 +70,7 @@ public interface ICache {
      * @param key 缓存键值
      * @return 是否删除成功
      */
-    boolean delete(final String key);
+    public abstract boolean delete(final String key);
 
     /**
      * 删除集合对象
@@ -103,7 +78,7 @@ public interface ICache {
      * @param keys 多个键值
      * @return 成功删除的对象数
      */
-    long delete(final Collection<String> keys);
+    public abstract long delete(final Collection<String> keys);
 
     /**
      * 根据key获取过期时间
@@ -111,7 +86,7 @@ public interface ICache {
      * @param key 缓存键值
      * @return 时间(秒) 返回0代表为永久有效
      */
-    long getExpireTime(String key);
+    public abstract long getExpireTime(String key);
 
     /**
      * 判断key是否存在
@@ -119,17 +94,7 @@ public interface ICache {
      * @param key 缓存键值
      * @return boolean
      */
-    boolean hasKey(String key);
-
-    /**
-     * 设置分布式锁
-     *
-     * @param key    缓存键
-     * @param value  缓存值
-     * @param expire 锁的时间(秒)
-     * @return 设置成功为 true
-     */
-    <V> Boolean setNx(String key, V value, long expire);
+    public abstract boolean hasKey(String key);
 
     /**
      * 设置分布式锁，有等待时间
@@ -140,7 +105,11 @@ public interface ICache {
      * @param timeout 在timeout时间内仍未获取到锁，则获取失败
      * @return 设置成功为 true
      */
-    <V> Boolean setNx(String key, V value, long expire, long timeout);
+    public abstract <V> Boolean lock(String key, V value, long expire, long timeout);
+
+    public final <V> Boolean lock(String key, V value, long expire) {
+        return this.lock(key, value, expire, 0);
+    }
 
     /**
      * 释放分布式锁
@@ -149,5 +118,9 @@ public interface ICache {
      * @param value 缓存值
      * @return boolean
      */
-    <V> boolean releaseNx(String key, V value);
+    public abstract <V> boolean unlock(String key, V value);
+
+    public String getKey(String key) {
+        return key;
+    }
 }

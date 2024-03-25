@@ -16,6 +16,10 @@
             <groupId>com.centent</groupId>
             <artifactId>centent-channel</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.centent</groupId>
+            <artifactId>centent-cache</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>

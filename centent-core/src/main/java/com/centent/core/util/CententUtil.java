@@ -17,7 +17,7 @@ public class CententUtil {
 
     public static boolean initialized(Object value) {
         if (value instanceof String s) {
-            return Strings.isNotBlank(s);
+            return Strings.isNotBlank(s) && !s.equals("null");
         }
         return !ObjectUtils.isEmpty(value);
     }
