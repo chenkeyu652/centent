@@ -122,7 +122,7 @@ public class WechatOfficialService {
     }
 
     private void handleMenuButton(OfficialMenu.Button button) {
-        if (button.isValidView()) {
+        if (!button.isValidView()) {
             return;
         }
         if (VIEW_MENUS.containsKey(button.getKey())) {
