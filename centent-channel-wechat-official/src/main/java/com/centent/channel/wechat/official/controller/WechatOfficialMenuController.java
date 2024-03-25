@@ -5,8 +5,6 @@ import com.centent.channel.wechat.official.bean.OfficialMenu;
 import com.centent.channel.wechat.official.bean.SNSToken;
 import com.centent.channel.wechat.official.service.WechatOfficialService;
 import com.centent.core.bean.Result;
-import com.centent.core.exception.IllegalArgumentException;
-import com.centent.core.util.CententUtil;
 import com.centent.core.util.JSONUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,11 +39,7 @@ public class WechatOfficialMenuController {
                             @RequestParam("state") String state,
                             HttpServletResponse response) throws IOException {
         SNSToken snsToken = wechatOfficialChannel.getSNSToken(code);
-        String viewUrl = wechatOfficialService.getViewUrl(state);
-        if (CententUtil.uninitialized(viewUrl)) {
-            throw new IllegalArgumentException("state参数非法：" + state);
-        }
-        viewUrl = OfficialMenu.getViewRequestUrl(viewUrl, JSONUtil.object2Map(snsToken));
+        String viewUrl = wechatOfficialService.getViewUrl(state, JSONUtil.object2Map(snsToken), false);
         response.sendRedirect(viewUrl);
     }
 

@@ -1,6 +1,6 @@
 package com.centent.channel;
 
-import com.centent.core.enums.Channel;
+import com.centent.channel.enums.Channel;
 
 public interface IChannel {
 

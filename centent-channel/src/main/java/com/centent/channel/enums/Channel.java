@@ -1,4 +1,4 @@
-package com.centent.core.enums;
+package com.centent.channel.enums;
 
 import com.centent.core.define.IBaseEnum;
 

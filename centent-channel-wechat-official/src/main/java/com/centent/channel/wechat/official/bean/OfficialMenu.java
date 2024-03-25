@@ -3,12 +3,9 @@ package com.centent.channel.wechat.official.bean;
 import com.centent.core.exception.BusinessException;
 import com.centent.core.util.CententUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.micrometer.common.util.StringUtils;
 import lombok.Data;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 微信公众号菜单配置
@@ -26,24 +23,6 @@ public class OfficialMenu {
     private List<Button> button;
 
     private OfficialMenu() {
-    }
-
-    public static String getViewRequestUrl(String url, Map<String, Object> params) {
-        if (StringUtils.isBlank(url)) {
-            return null;
-        }
-        if (CollectionUtils.isEmpty(params)) {
-            return url;
-        }
-        String requestUrl = url;
-        for (String key : params.keySet()) {
-            Object value = params.get(key);
-            if (CententUtil.uninitialized(value)) {
-                value = "";
-            }
-            requestUrl = requestUrl.replace("{" + key + "}", value.toString());
-        }
-        return requestUrl;
     }
 
     @Data

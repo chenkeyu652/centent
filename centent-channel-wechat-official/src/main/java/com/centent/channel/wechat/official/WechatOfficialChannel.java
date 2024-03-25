@@ -3,6 +3,7 @@ package com.centent.channel.wechat.official;
 import com.centent.cache.ICache;
 import com.centent.channel.IChannel;
 import com.centent.channel.NotifyContext;
+import com.centent.channel.enums.Channel;
 import com.centent.channel.wechat.official.bean.OfficialMenu;
 import com.centent.channel.wechat.official.bean.SNSToken;
 import com.centent.channel.wechat.official.bean.TemplateMessage;
@@ -11,7 +12,6 @@ import com.centent.channel.wechat.official.entity.WechatOfficialUser;
 import com.centent.channel.wechat.official.enums.UserStatus;
 import com.centent.channel.wechat.official.retrofit.WechatOfficialAPI;
 import com.centent.channel.wechat.official.service.WechatOfficialUserService;
-import com.centent.core.enums.Channel;
 import com.centent.core.exception.BusinessException;
 import com.centent.core.exception.HttpRequestException;
 import com.centent.core.exception.IllegalArgumentException;
@@ -78,7 +78,7 @@ public class WechatOfficialChannel implements IChannel {
         }
 
         // 发送消息前，需要先判断用户是否关注公众号
-        WechatOfficialUser user = userService.getIfExistByOpenid(context.getTarget());
+        WechatOfficialUser user = userService.getIfExistByOpenid(openid);
         if (Objects.isNull(user)
                 || user.getStatus() == UserStatus.UNSUBSCRIBE
                 || user.getStatus() == UserStatus.FORBIDDEN_UNSUBSCRIBE) {

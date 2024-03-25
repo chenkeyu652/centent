@@ -2,7 +2,7 @@ package com.centent.cache.memory;
 
 import com.centent.cache.ICache;
 import com.centent.cache.memory.CaffeineCacheDefine.CaffeineWrapper;
-import com.centent.core.exception.CacheException;
+import com.centent.core.exception.BusinessException;
 import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +49,7 @@ public class MemoryCache extends ICache {
             try {
                 return new CaffeineWrapper(loader.call(), timeout1, timeUnit);
             } catch (Exception e) {
-                throw new CacheException("缓存写入执行失败：" + this.getKey(key), e);
+                throw new BusinessException("执行失败：" + this.getKey(key), e);
             }
         }).value();
     }

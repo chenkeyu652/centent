@@ -6,6 +6,7 @@ import com.centent.channel.wechat.official.entity.WechatOfficialUser;
 import com.centent.channel.wechat.official.enums.UserRule;
 import com.centent.channel.wechat.official.enums.UserStatus;
 import com.centent.core.exception.BusinessException;
+import com.centent.core.exception.IllegalArgumentException;
 import com.centent.core.util.CententUtil;
 import com.centent.core.util.JSONUtil;
 import jakarta.annotation.Resource;
@@ -65,7 +66,7 @@ public class WechatOfficialService {
             List<OfficialMenu.Button> subButtons = topButton.getSub_button();
             // 普通菜单
             if (CollectionUtils.isEmpty(subButtons)) {
-                this.handleButton(topButton);
+                this.handleMenuButton(topButton);
             }
             // 二级菜单
             else {
@@ -73,7 +74,7 @@ public class WechatOfficialService {
                     throw new BusinessException("二级菜单数组，个数应为1~5个");
                 }
                 for (OfficialMenu.Button subButton : subButtons) {
-                    this.handleButton(subButton);
+                    this.handleMenuButton(subButton);
                 }
             }
         }
@@ -81,30 +82,59 @@ public class WechatOfficialService {
         return menu;
     }
 
-    public String getViewUrl(String state) {
+    public String getViewUrl(String state, Map<String, Object> params, boolean withDomain) {
         if (CententUtil.uninitialized(state) || !VIEW_MENUS.containsKey(state)) {
-            return null;
+            throw new IllegalArgumentException("state参数非法：" + state);
         }
-        return VIEW_MENUS.get(state).getOriginalUrl();
+        String originalUrl = VIEW_MENUS.get(state).getOriginalUrl();
+        if (CollectionUtils.isEmpty(params)) {
+            return originalUrl;
+        }
+        String requestUrl = originalUrl;
+        for (String key : params.keySet()) {
+            Object value = params.get(key);
+            if (CententUtil.uninitialized(value)) {
+                value = "";
+            }
+            requestUrl = requestUrl.replace("{" + key + "}", value.toString());
+        }
+        if (withDomain) {
+            requestUrl = config.getAuthDomain() + requestUrl;
+        }
+        return requestUrl;
     }
 
-    private void handleButton(OfficialMenu.Button button) {
-        if (button.isValidView()) {
-            if (VIEW_MENUS.containsKey(button.getKey())) {
-                OfficialMenu.Button repeat = VIEW_MENUS.get(button.getKey());
-                throw new BusinessException("菜单key重复：key=" + button.getKey() +
-                        "，name1：" + button.getName() + "，name2：" + repeat.getName());
+    public String getAuthorizeUrl(String redirectUrl, String state) {
+        if (!redirectUrl.startsWith("http")) {
+            if (!redirectUrl.startsWith("/")) {
+                redirectUrl = "/" + redirectUrl;
             }
-
-            button.setOriginalUrl(button.getUrl());
-            String url = config.getAuthDomain() + "/wechat/official/menu/redirect";
-            url = URLEncoder.encode(url, StandardCharsets.UTF_8);
-            url = "https://open.weixin.qq.com/connect/oauth2/authorize?"
-                    + "appid=" + config.getAppId() + "&redirect_uri=" + url
-                    + "&response_type=code&scope=snsapi_base&state=" + button.getKey() + "#wechat_redirect";
-            button.setUrl(URLEncoder.encode(url, StandardCharsets.UTF_8));
-            VIEW_MENUS.put(button.getKey(), button);
+            redirectUrl = config.getAuthDomain() + redirectUrl;
         }
+        redirectUrl = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
+        return "https://open.weixin.qq.com/connect/oauth2/authorize?"
+                + "appid=" + config.getAppId() + "&redirect_uri=" + redirectUrl
+                + "&response_type=code&scope=snsapi_base&state=" + state + "#wechat_redirect";
+    }
+
+    public String getAuthorizeUrl(String redirectUrl) {
+        return this.getAuthorizeUrl(redirectUrl, "unused");
+    }
+
+    private void handleMenuButton(OfficialMenu.Button button) {
+        if (button.isValidView()) {
+            return;
+        }
+        if (VIEW_MENUS.containsKey(button.getKey())) {
+            OfficialMenu.Button repeat = VIEW_MENUS.get(button.getKey());
+            throw new BusinessException("菜单key重复：key=" + button.getKey() +
+                    "，name1：" + button.getName() + "，name2：" + repeat.getName());
+        }
+
+        button.setOriginalUrl(button.getUrl());
+        String url = config.getAuthDomain() + "/wechat/official/menu/redirect";
+        button.setUrl(this.getAuthorizeUrl(url, button.getKey()));
+        VIEW_MENUS.put(button.getKey(), button);
     }
 
     /**
