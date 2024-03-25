@@ -1,6 +1,7 @@
 package com.centent.storage.local;
 
 import com.centent.core.exception.BusinessException;
+import com.centent.core.exception.NotFoundException;
 import com.centent.storage.IStorage;
 import com.centent.storage.entity.Attachment;
 import com.centent.storage.local.bean.StorageLocalConfig;
@@ -34,7 +35,7 @@ public class StorageLocal extends IStorage {
     @Override
     public File upload0(Attachment attachment, File file) {
         // 保存文件到dest下
-        File destFile = new File(dest, attachment.getStoredFileName());
+        File destFile = new File(dest, attachment.getId());
         try {
             Files.copy(file.toPath(), destFile.toPath());
         } catch (IOException e) {
@@ -46,16 +47,16 @@ public class StorageLocal extends IStorage {
     @Override
     public File upload0(Attachment attachment, MultipartFile file) throws IOException {
         // 保存文件到dest下
-        File destFile = new File(dest, attachment.getStoredFileName());
+        File destFile = new File(dest, attachment.getId());
         file.transferTo(destFile);
         return destFile;
     }
 
     @Override
     public File get0(Attachment attachment) {
-        File target = new File(dest, attachment.getStoredFileName());
+        File target = new File(dest, attachment.getId());
         if (!target.exists()) {
-            throw new BusinessException("文件不存在：" + attachment.getStoredFileName());
+            throw new NotFoundException("文件不存在：" + attachment.getId());
         }
         return target;
     }
@@ -63,6 +64,6 @@ public class StorageLocal extends IStorage {
     @Override
     public String getFilePath(String fileId) {
         Attachment attachment = attachmentService.selectById(fileId);
-        return dest.getAbsolutePath() + File.separator + attachment.getStoredFileName();
+        return dest.getAbsolutePath() + File.separator + attachment.getId();
     }
 }

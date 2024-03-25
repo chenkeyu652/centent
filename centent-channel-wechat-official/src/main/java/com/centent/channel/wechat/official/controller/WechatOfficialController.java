@@ -47,7 +47,7 @@ public class WechatOfficialController {
                     checked, signature, timestamp, nonce);
             return checked ? echoStr : "failed";
         } else {
-            //post请求跟消息相关的逻辑
+            // post请求跟消息相关的逻辑
             String body = null;
             try {
                 body = this.readRequestBody(request);

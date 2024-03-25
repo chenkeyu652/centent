@@ -1,10 +1,13 @@
 package com.centent.storage;
 
 import com.centent.core.exception.BusinessException;
+import com.centent.core.exception.NotFoundException;
+import com.centent.core.util.CententUtil;
 import com.centent.core.util.FileUtil;
 import com.centent.storage.entity.Attachment;
 import com.centent.storage.mapper.AttachmentMapper;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
+@Slf4j
 public abstract class IStorage {
 
     @Resource
@@ -33,77 +37,67 @@ public abstract class IStorage {
         // 计算文件hash
         String hash = FileUtil.hash(file);
 
-        Attachment attachment = this.getAttachment(hash, file.getOriginalFilename(), file.getSize());
-
-        // 上传时间和更新时间一致，标识该文件为新文件，需要执行文件上传
-        if (attachment.getCreateTime().isEqual(attachment.getUpdateTime())) {
-            try {
-                File destFile = this.upload0(attachment, file);
-                attachment.setFile(destFile);
-            } catch (IOException e) {
-                throw new BusinessException("上传文件失败！", e);
-            }
-        } else {
-            File destFile = this.get(attachment.getId());
-            attachment.setFile(destFile);
-        }
-        return attachment;
+        return this.doUpload(file, hash, file.getOriginalFilename(), file.getSize());
     }
 
     @Transactional
     public Attachment upload(File file) {
         // 计算文件hash
         String hash = FileUtil.hash(file);
+        return this.doUpload(file, hash, file.getName(), file.length());
+    }
 
-        Attachment attachment = this.getAttachment(hash, file.getName(), file.length());
+    private Attachment doUpload(Object file, String hash, String fileName, long size) {
+        Attachment attachment = this.getAttachment(hash, fileName, size);
 
-        // 上传时间和更新时间一致，标识该文件为新文件，需要执行文件上传
-        if (attachment.getCreateTime().isEqual(attachment.getUpdateTime())) {
+        if (!attachment.isNew()) {
             try {
-                File destFile = this.upload0(attachment, file);
+                File storedFile = this.get0(attachment);
+                attachment.setFile(storedFile);
+            } catch (NotFoundException e) {
+                log.error("文件不存在：" + attachment.getId(), e);
+                // 增加防护，如果实体文件不存在，就再上传一次
+                attachment.setNew(true);
+            }
+        }
+
+        // 需要执行文件上传
+        if (attachment.isNew()) {
+            try {
+                File destFile;
+                if (file instanceof MultipartFile) {
+                    destFile = this.upload0(attachment, (MultipartFile) file);
+                } else {
+                    destFile = this.upload0(attachment, (File) file);
+                }
                 attachment.setFile(destFile);
             } catch (IOException e) {
                 throw new BusinessException("上传文件失败！", e);
             }
-        } else {
-            File destFile = this.get(attachment.getId());
-            attachment.setFile(destFile);
         }
         return attachment;
     }
 
-    public File get(String fileId) {
+    public Attachment get(String fileId) {
         Attachment attachment = attachmentMapper.selectById(fileId);
         if (Objects.isNull(attachment)) {
             throw new BusinessException("文件ID不存在：" + fileId);
         }
-        return this.get0(attachment);
+        attachment.setFile(this.get0(attachment));
+        return attachment;
     }
 
-    private Attachment getAttachment(String hash, String name, Long size) {
+    private Attachment getAttachment(String hash, String fileName, Long size) {
         Attachment attachment = attachmentMapper.selectById(hash);
-
-        boolean exists = Objects.nonNull(attachment);
-        if (!exists) {
+        if (Objects.isNull(attachment)) {
             attachment = new Attachment(hash);
+            fileName = CententUtil.initialized(fileName) ? fileName : "";
             attachment.setSize(size);
-        }
-
-        if (Objects.isNull(name)) {
-            name = "";
-        }
-        attachment.setName(name);
-
-        if (name.contains(".")) {
-            String type = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
-            if (Objects.equals("jpeg", type)) {
-                type = "jpg";
+            attachment.setName(fileName);
+            if (fileName.contains(".")) {
+                String type = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                attachment.setType(type);
             }
-            attachment.setType(type);
-        }
-        if (exists) {
-            attachmentMapper.updateById(attachment);
-        } else {
             attachmentMapper.insert(attachment);
         }
         return attachment;

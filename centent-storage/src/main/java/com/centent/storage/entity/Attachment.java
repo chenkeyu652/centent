@@ -36,10 +36,14 @@ public class Attachment extends BaseEntity {
     private Long size;
 
     @JsonIgnore
+    private transient boolean isNew;
+
+    @JsonIgnore
     private transient File file;
 
     public Attachment(String hash) {
         this.id = hash;
+        this.isNew = true;
     }
 
     public String getStoredFileName() {
