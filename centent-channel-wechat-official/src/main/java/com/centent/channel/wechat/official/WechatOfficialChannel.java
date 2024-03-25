@@ -77,7 +77,13 @@ public class WechatOfficialChannel implements IChannel {
             throw new IllegalArgumentException("微信公众号发送消息失败，openid不能为空");
         }
 
-        // TODO...需要先判断用户是否关注公众号
+        // 发送消息前，需要先判断用户是否关注公众号
+        WechatOfficialUser user = userService.getIfExistByOpenid(context.getTarget());
+        if (Objects.isNull(user)
+                || user.getStatus() == UserStatus.UNSUBSCRIBE
+                || user.getStatus() == UserStatus.FORBIDDEN_UNSUBSCRIBE) {
+            throw new BusinessException("微信公众号发送消息失败，用户未关注公众号");
+        }
 
         Map<String, String> params = context.getParams();
         try {
