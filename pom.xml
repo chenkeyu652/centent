@@ -20,6 +20,7 @@
         <module>centent-cache</module>
         <module>centent-cache-memory</module>
         <module>centent-cache-redis</module>
+        <module>centent-auth</module>
     </modules>
 
     <properties>
@@ -212,6 +213,11 @@
             <dependency>
                 <groupId>com.centent</groupId>
                 <artifactId>centent-cache-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.centent</groupId>
+                <artifactId>centent-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
