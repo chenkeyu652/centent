@@ -9,6 +9,10 @@ public interface Interceptor<P, R> {
 
     String name();
 
+    default boolean async() {
+        return false;
+    }
+
     @SuppressWarnings("unchecked")
     default void before0(Object arg) {
         this.before((P) arg);
