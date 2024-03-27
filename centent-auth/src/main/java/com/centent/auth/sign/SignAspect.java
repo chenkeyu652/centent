@@ -5,19 +5,24 @@ import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -25,67 +30,82 @@ import java.util.Objects;
 @Order(-1)
 public class SignAspect {
 
-    @Value("${centent.auth.sign.secret:92423224-71c2-4e1b-a239-a0d457a6b9bf}")
-    private String secret;
+    private static final Map<Class<?>, SignHandler> SIGN_HANDLERS = new ConcurrentHashMap<>();
+
+    @Resource
+    private SignConfig signConfig;
 
     @Resource
     private HttpServletRequest request;
 
     @Before("@within(com.centent.auth.sign.Sign) || @annotation(com.centent.auth.sign.Sign)")
     public void beforeClass(JoinPoint joinPoint) {
-        Signature signature = joinPoint.getSignature();
-        if (signature instanceof MethodSignature ms) {
-            Method method = ms.getMethod();
-            Sign sign = method.getAnnotation(Sign.class);
-            Class<?> targetClass = joinPoint.getTarget().getClass();
-            if (Objects.isNull(sign) && targetClass.isAnnotationPresent(Sign.class)) {
-                sign = targetClass.getAnnotation(Sign.class);
-            }
-            if (Objects.isNull(sign)) {
-                return;
-            }
+        Sign sign = this.getAnnotation(joinPoint, Sign.class);
+        Assert.notNull(sign, "@Sign注解AOP不可能为空");
 
-            String appId = this.getHeader("X-Auth-appId");
-            String time = this.getHeader("X-Auth-Time");
-            String signStr = this.getHeader("X-Auth-Sign");
+        String appId = this.getHeader("X-Auth-App");
+        String time = this.getHeader("X-Auth-Time");
+        String signStr = this.getHeader("X-Auth-Sign");
 
-            // TODO...time有效期校验，前后不能超过5分钟
+        // TODO...time有效期校验，前后不能超过5分钟
 
-            List<String> signKeys = Lists.newArrayList(time, appId); // 基础验签，根据时间+随机数进行验签，优先级最低
-            // 通过注解指定的SignExecutor实现类进行验签
-            if (!sign.value().equals(Void.class) && SignHandler.class.isAssignableFrom(sign.value())) {
+        List<String> signKeys = Lists.newArrayList(time, appId); // 基础验签，根据时间+随机数进行验签，优先级最低
+        // 通过注解指定的SignHandler实现类进行验签
+        if (!sign.value().equals(Void.class) && SignHandler.class.isAssignableFrom(sign.value())) {
+            SignHandler handler = SIGN_HANDLERS.computeIfAbsent(sign.value(), (key) -> {
                 try {
-                    SignHandler executor = (SignHandler) sign.value().getConstructor().newInstance();
-                    signKeys = executor.getSignKeys(appId, time, joinPoint.getArgs());
+                    return (SignHandler) sign.value().getConstructor().newInstance();
                 } catch (Exception e) {
-                    log.error("注解指定的SignExecutor实现类异常", e);
+                    log.error("注解指定的实现类实例化失败：" + sign.value().getName(), e);
+                    throw new RuntimeException("签名验证失败", e);
                 }
-            } else {
-                // 从方法入参中找SignBO实现，通过找到的第一个SignBO参数进行验签
-                Object[] args = joinPoint.getArgs();
-                for (Object arg : args) {
-                    if (arg instanceof SignBO) {
-                        signKeys = ((SignBO) arg).getSignKeys(appId, time);
-                        break;
-                    }
+            });
+            signKeys.addAll(handler.getSignKeys(joinPoint.getArgs()));
+        } else {
+            // 从方法入参中寻找SignKey的实现
+            Object[] args = joinPoint.getArgs();
+            for (Object arg : args) {
+                if (Objects.nonNull(arg) && arg instanceof SignKey) {
+                    signKeys.addAll(((SignKey) arg).signKeys());
                 }
-            }
-            // 按照字典顺序排序后验签
-            signKeys.sort(String::compareTo);
-            String message = String.join("", signKeys);
-            String checkSign = SignatureUtil.signSHA256(secret, message);
-            if (!Objects.equals(checkSign, signStr)) {
-                String errorMsg = MessageFormat.format("验签失败，appId:{0}, message:{1}, signStr:{2}, checkSign:{3}",
-                        appId, message, signStr, checkSign);
-                throw new RuntimeException(errorMsg);
             }
         }
+        signKeys = signKeys.stream().filter(Strings::isNotEmpty).collect(Collectors.toList());
+        // 按照字典顺序排序
+        signKeys.sort(String::compareTo);
+        String message = String.join("", signKeys);
+        log.info("sign --> target: {}, appId: {}, message: {}", joinPoint.getSignature().toShortString(), appId, message);
+        String checkSign = SignatureUtil.signSHA256(signConfig.getPairs().get(appId), message, true);
+        if (!Objects.equals(checkSign, signStr)) {
+            String errorMsg = MessageFormat.format("验签失败，signStr:{0}, checkSign:{1}, appId:{2}, message:{3}",
+                    signStr, checkSign, appId, message);
+            log.error(errorMsg);
+            throw new RuntimeException("签名验证错误");
+        }
+    }
+
+    private <T extends Annotation> T getAnnotation(JoinPoint joinPoint, Class<T> clazz) {
+        Signature signature = joinPoint.getSignature();
+        if (!(signature instanceof MethodSignature ms)) {
+            return null;
+        }
+        Method method = ms.getMethod();
+        T annotation = method.getAnnotation(clazz);
+        if (Objects.nonNull(annotation)) {
+            return annotation;
+        }
+        Class<?> targetClass = joinPoint.getTarget().getClass();
+        if (targetClass.isAnnotationPresent(clazz)) {
+            return targetClass.getAnnotation(clazz);
+        }
+        return null;
     }
 
     private String getHeader(String name) {
         String header = request.getHeader(name);
         if (Objects.isNull(header)) {
-            throw new RuntimeException("header[" + name + "] is null");
+            log.error("签名验证错误，请求头[{}]不存在", name);
+            throw new RuntimeException("签名验证错误");
         }
         return header;
     }

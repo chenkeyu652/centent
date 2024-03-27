@@ -1,4 +1,4 @@
-package com.centent.auth.sign;
+package com.centent.auth.crypt;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -10,8 +10,10 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.TYPE, ElementType.METHOD})
-public @interface Sign {
+@Target(value = {ElementType.METHOD, ElementType.PARAMETER})
+public @interface Crypt {
 
-    Class<?> value() default Void.class;
+    boolean request() default false;
+
+    boolean response() default false;
 }

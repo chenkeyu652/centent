@@ -1,4 +1,19 @@
 package com.centent.core.bean;
 
-public record RSAKeyPair(String publicKey, String privateKey) {
+import lombok.Data;
+
+@Data
+public class RSAKeyPair {
+
+    private String publicKey;
+
+    private String privateKey;
+
+    public RSAKeyPair() {
+    }
+
+    public RSAKeyPair(String publicKey, String privateKey) {
+        this.publicKey = publicKey;
+        this.privateKey = privateKey;
+    }
 }
