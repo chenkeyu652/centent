@@ -26,6 +26,14 @@ public class CententUtil {
         return !initialized(value);
     }
 
+    public static <T> T getOrDefault(Object value, T defaultValue) {
+        if (initialized(value)) {
+            return (T) value;
+        }
+        return defaultValue;
+
+    }
+
     /**
      * 从给定的参数中找出第一个初始化的值，如果均未初始化，返回null
      *
