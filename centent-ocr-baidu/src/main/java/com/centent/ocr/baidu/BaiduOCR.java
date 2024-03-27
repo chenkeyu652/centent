@@ -62,9 +62,12 @@ public class BaiduOCR extends IOCR {
             if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
                 throw new HttpRequestException("调用百度身份证OCR错误，response body --> " + JSONUtil.toJSONString(body));
             }
+            Map<String, Object> result = (Map<String, Object>) body.get("words_result");
+            if (CollectionUtils.isEmpty(result)) {
+                throw new HttpRequestException("调用百度身份证OCR错误，response body --> " + JSONUtil.toJSONString(body));
+            }
 
             Idcard idcard = new Idcard();
-            Map<String, Object> result = (Map<String, Object>) body.get("words_result");
             result.forEach((key, value) -> {
                 if (BaiduOCRFieldPair.IDCARD_PAIRS.containsKey(key) && CententUtil.initialized(value)) {
                     CardEntity entity = JSONUtil.map2Object((Map<String, Object>) value, CardEntity.class);
@@ -100,9 +103,12 @@ public class BaiduOCR extends IOCR {
             if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
                 throw new HttpRequestException("调用百度行驶证OCR错误，response body --> " + JSONUtil.toJSONString(body));
             }
+            Map<String, Object> result = (Map<String, Object>) body.get("words_result");
+            if (CollectionUtils.isEmpty(result)) {
+                throw new HttpRequestException("调用百度行驶证OCR错误，response body --> " + JSONUtil.toJSONString(body));
+            }
 
             VehicleLicence vehicleLicence = new VehicleLicence();
-            Map<String, Object> result = (Map<String, Object>) body.get("words_result");
             result.forEach((key, value) -> {
                 if (BaiduOCRFieldPair.VEHICLE_LICENCE_PAIRS.containsKey(key) && CententUtil.initialized(value)) {
                     CardEntity entity = JSONUtil.map2Object((Map<String, Object>) value, CardEntity.class);
@@ -129,9 +135,12 @@ public class BaiduOCR extends IOCR {
             if (CollectionUtils.isEmpty(body) || !body.containsKey("words_result")) {
                 throw new HttpRequestException("调用百度合格证OCR错误，response body --> " + JSONUtil.toJSONString(body));
             }
+            Map<String, Object> result = (Map<String, Object>) body.get("words_result");
+            if (CollectionUtils.isEmpty(result)) {
+                throw new HttpRequestException("调用百度合格证OCR错误，response body --> " + JSONUtil.toJSONString(body));
+            }
 
             VehicleCertificate vehicleCertificate = new VehicleCertificate();
-            Map<String, Object> result = (Map<String, Object>) body.get("words_result");
             result.forEach((key, value) -> {
                 if (BaiduOCRFieldPair.VEHICLE_CERTIFICATE_PAIRS.containsKey(key) && CententUtil.initialized(value)) {
                     BaiduOCRFieldPair.VEHICLE_CERTIFICATE_PAIRS.get(key).accept(vehicleCertificate, String.valueOf(value));
