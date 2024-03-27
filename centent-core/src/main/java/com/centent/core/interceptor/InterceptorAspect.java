@@ -50,11 +50,15 @@ public class InterceptorAspect {
         final Object param = ArrayUtils.isNotEmpty(args) ? args[0] : null;
 
         // TODO...有些任务可以异步执行
-        interceptors.forEach(i -> i.before0(param));
+        interceptors.stream()
+                .filter(i -> i.beforeSupports0(param))
+                .forEach(i -> i.before0(param));
 
         Object proceed = joinPoint.proceed();
 
-        interceptors.forEach(i -> i.after0(param, proceed));
+        interceptors.stream()
+                .filter(i -> i.afterSupports0(param, proceed))
+                .forEach(i -> i.after0(param, proceed));
 
         return proceed;
     }

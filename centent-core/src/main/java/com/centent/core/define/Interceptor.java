@@ -5,6 +5,7 @@ package com.centent.core.define;
  *
  * @since 0.0.1
  */
+@SuppressWarnings("unchecked")
 public interface Interceptor<P, R> {
 
     String name();
@@ -13,12 +14,34 @@ public interface Interceptor<P, R> {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
+    default boolean supports(P p) {
+        return true;
+    }
+
+    default boolean beforeSupports(P p) {
+        return this.supports(p);
+    }
+
+    default boolean afterSupports(P p, R t) {
+        return this.supports(p);
+    }
+
+    default boolean supports0(Object arg) {
+        return this.supports((P) arg);
+    }
+
+    default boolean beforeSupports0(Object arg) {
+        return this.beforeSupports((P) arg);
+    }
+
+    default boolean afterSupports0(Object arg, Object result) {
+        return this.afterSupports((P) arg, (R) result);
+    }
+
     default void before0(Object arg) {
         this.before((P) arg);
     }
 
-    @SuppressWarnings("unchecked")
     default void after0(Object arg, Object result) {
         this.after((P) arg, (R) result);
     }
