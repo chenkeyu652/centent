@@ -11,6 +11,8 @@ import com.centent.core.exception.UnimportantException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -95,6 +97,17 @@ public class GlobalExceptionHandler {
     public Result<Object> methodArgumentTypeMismatchException(HttpServletRequest request, MethodArgumentTypeMismatchException e) {
         this.commonHandle(request, e);
         return Result.error("非法参数！");
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    public Result<Object> constraintViolationException(HttpServletRequest request, ConstraintViolationException e) {
+        this.commonHandle(request, e);
+        String errorMessage = e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .reduce((msg1, msg2) -> msg1 + "\n" + msg2)
+                .orElse("参数不正确");
+        return Result.error(errorMessage);
     }
 
     @ResponseBody
