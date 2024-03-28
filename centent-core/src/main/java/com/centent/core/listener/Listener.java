@@ -1,5 +1,7 @@
-package com.centent.core.interceptor;
+package com.centent.core.listener;
 
+
+import com.centent.core.define.IListener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,7 +10,8 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface Interceptor {
+public @interface Listener {
 
-    Class<? extends com.centent.core.define.Interceptor<?, ?>> value();
+    @SuppressWarnings("rawtypes")
+    Class<? extends IListener> value();
 }

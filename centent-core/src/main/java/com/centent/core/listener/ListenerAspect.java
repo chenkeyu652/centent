@@ -1,8 +1,7 @@
-package com.centent.core.interceptor;
+package com.centent.core.listener;
 
 import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.centent.core.define.Interceptor;
+import com.centent.core.define.IListener;
 import jakarta.annotation.Resource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -13,35 +12,35 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
 @Component
-public class InterceptorAspect {
+public class ListenerAspect {
 
-    private static final Map<Class<? extends Interceptor<?, ?>>, Collection<? extends Interceptor<?, ?>>> INTERCEPTOR_MAP = new HashMap<>();
+    private static final Map<Class<? extends IListener<Object, Object>>, Collection<? extends IListener<Object, Object>>>
+            LISTENER_MAP = new ConcurrentHashMap<>();
 
     @Resource
     private ApplicationContext applicationContext;
 
 
-    @Pointcut("@annotation(com.centent.core.interceptor.Interceptor)")
+    @Pointcut("@annotation(com.centent.core.listener.Listener)")
     public void pointcut() {
     }
 
     @Around(value = "pointcut()")
     public Object doAspect(ProceedingJoinPoint joinPoint) throws Throwable {
-        Class<? extends Interceptor<?, ?>> clazz = this.getInterceptor(joinPoint);
-
-
-        Collection<? extends Interceptor<?, ?>> interceptors = INTERCEPTOR_MAP.computeIfAbsent(clazz, k -> {
-            Map<String, ? extends Interceptor<?, ?>> beans = applicationContext.getBeansOfType(clazz);
+        Class<? extends IListener<Object, Object>> clazz = this.getListeners(joinPoint);
+        Collection<? extends IListener<Object, Object>> listeners = LISTENER_MAP.computeIfAbsent(clazz, k -> {
+            Map<String, ? extends IListener<Object, Object>> beans = applicationContext.getBeansOfType(clazz);
             return CollectionUtils.isEmpty(beans) ? Collections.emptyList() : beans.values();
         });
 
@@ -50,23 +49,24 @@ public class InterceptorAspect {
         final Object param = ArrayUtils.isNotEmpty(args) ? args[0] : null;
 
         // TODO...有些任务可以异步执行
-        interceptors.stream()
-                .filter(i -> i.beforeSupports0(param))
-                .forEach(i -> i.before0(param));
+        listeners.stream()
+                .filter(i -> i.preCheck(param))
+                .forEach(i -> i.preHandle(param));
 
         Object proceed = joinPoint.proceed();
 
-        interceptors.stream()
-                .filter(i -> i.afterSupports0(param, proceed))
-                .forEach(i -> i.after0(param, proceed));
+        listeners.stream()
+                .filter(i -> i.postCheck(param, proceed))
+                .forEach(i -> i.postHandle(param, proceed));
 
         return proceed;
     }
 
-    private Class<? extends Interceptor<?, ?>> getInterceptor(ProceedingJoinPoint joinPoint) {
+    @SuppressWarnings("unchecked")
+    private Class<? extends IListener<Object, Object>> getListeners(ProceedingJoinPoint joinPoint) {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        com.centent.core.interceptor.Interceptor annotation =
-                method.getAnnotation(com.centent.core.interceptor.Interceptor.class);
-        return annotation.value();
+        com.centent.core.listener.Listener annotation =
+                method.getAnnotation(com.centent.core.listener.Listener.class);
+        return (Class<? extends IListener<Object, Object>>) annotation.value();
     }
 }
