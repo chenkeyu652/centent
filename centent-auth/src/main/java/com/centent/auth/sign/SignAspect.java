@@ -51,7 +51,7 @@ public class SignAspect {
 
         List<String> signKeys = Lists.newArrayList(time, appId); // 基础验签，根据时间+随机数进行验签，优先级最低
         // 通过注解指定的SignHandler实现类进行验签
-        if (!sign.value().equals(Void.class) && SignHandler.class.isAssignableFrom(sign.value())) {
+        if (!sign.value().equals(NoneSignHandler.class) && SignHandler.class.isAssignableFrom(sign.value())) {
             SignHandler handler = SIGN_HANDLERS.computeIfAbsent(sign.value(), (key) -> {
                 try {
                     return (SignHandler) sign.value().getConstructor().newInstance();
@@ -108,5 +108,12 @@ public class SignAspect {
             throw new RuntimeException("签名验证错误");
         }
         return header;
+    }
+
+    static class NoneSignHandler implements SignHandler {
+        @Override
+        public List<String> getSignKeys(Object[] args) {
+            return null;
+        }
     }
 }

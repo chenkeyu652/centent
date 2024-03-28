@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.TYPE, ElementType.METHOD})
 public @interface Sign {
 
-    Class<?> value() default Void.class;
+    Class<? extends SignHandler> value() default SignAspect.NoneSignHandler.class;
 }
